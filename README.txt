@@ -25,9 +25,7 @@
 
 
   +-- SPAWNROOMS --+
- Changing spawnrooms was to be implemented by activating and deactivating info_player_attacker and info_player_defender with the OnPass trigger in path_track.
- However these entities have no name field, this is still being solved.
- Alternatively a teleport can be used.
+  Movable spawns are implemented by using multiple trigger_teleports
 
 
 
@@ -44,3 +42,4 @@
   +-- Further additions --+
  Rollback could be implemented using a delayed OnEndTouchAll and CancelPending
  Teleport-based spawnrooms will be designed soon
+ HUD and cart notifications could be implemented with displaying text on player's screen
