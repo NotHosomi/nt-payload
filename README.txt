@@ -26,20 +26,19 @@
 
   +-- SPAWNROOMS --+
   Movable spawns are implemented by using multiple trigger_teleports
+  Spawn rooms are enabled and disabled by use of a logic_relay disabling and enabling the corresponding trigger_teleports
 
 
 
   +-- PLUGIN INTERACTIONS --+
- @Rain
- I would like for the plugin to do a few things when recieveing a set of outputs from the map
+ The plugin is required to do a few things when recieveing a set of outputs from the map
 >Add time when each capturepoint logic_relay is triggered
 >End the game when the logic_relay AttackerWin is triggered
 
  Some additional features that would be a bonus would be things like a modified HUD, but I don't know if a plugin can do that.
- Alternatively we just use a text entity to say the current status of the cart at the bottom of the screen, which is all map-side logic.
+ Alternatively we just use a text entity to say the current status of the cart at the bottom of the screen.
 
 
   +-- Further additions --+
  Rollback could be implemented using a delayed OnEndTouchAll and CancelPending
- Teleport-based spawnrooms will be designed soon
  HUD and cart notifications could be implemented with displaying text on player's screen

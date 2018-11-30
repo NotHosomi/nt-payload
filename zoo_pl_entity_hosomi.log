@@ -1168,3 +1168,33 @@ Reduced 258 texinfos to 176
 Reduced 22 texdatas to 21 (502 bytes to 441)
 Writing C:\Users\Hosomi\Desktop\Folders\Mapping\NT\Payload Entity Zoo\zoo_pl_entity_hosomi.bsp
 0 seconds elapsed
+
+
+
+materialPath: C:\Program Files (x86)\Steam\steamapps\common\neotokyo\mapping\materials
+Loading C:\Users\Hosomi\Desktop\Folders\Mapping\NT\Payload_Mapside\zoo_pl_entity_hosomi.vmf
+fixing up env_cubemap materials on brush sides...
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Processing areas...done (0)
+Building Faces...done (0)
+FixTjuncs...
+PruneNodes...
+WriteBSP...
+done (0)
+writing C:\Users\Hosomi\Desktop\Folders\Mapping\NT\Payload_Mapside\zoo_pl_entity_hosomi.prt...done (0)
+Creating default cubemaps for env_cubemap using skybox materials:
+skybox/sky_day01_01*.vmt
+Run buildcubemaps in the engine to get the correct cube maps.
+
+No such variable "$hdrbasetexture" for material "skybox/sky_day01_01rt"
+Can't load skybox file skybox/sky_day01_01 to build the default cubemap!
+Finding displacement neighbors...
+Finding lightmap sample positions...
+Displacement Alpha : 0...1...2...3...4...5...6...7...8...9...10
+Building Physics collision data...
+done (0) (47538 bytes)
+Placing detail props : 0...1...2...3...4...5...6...7...8...9...10
+Compacting texture/material tables...
+Reduced 292 texinfos to 207
+Reduced 23 texdatas to 22 (526 bytes to 465)
+Writing C:\Users\Hosomi\Desktop\Folders\Mapping\NT\Payload_Mapside\zoo_pl_entity_hosomi.bsp
+0 seconds elapsed
