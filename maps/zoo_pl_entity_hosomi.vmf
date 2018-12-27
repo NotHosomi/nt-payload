@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "4037"
-	"mapversion" "103"
+	"mapversion" "104"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -20,7 +20,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "103"
+	"mapversion" "104"
 	"classname" "worldspawn"
 	"skyname" "sky_day01_01"
 	"maxpropscreenwidth" "-1"
@@ -11140,7 +11140,7 @@ entity
 	"targetname" "AttackerWin"
 	connections
 	{
-		"" ",,,0,-1"
+		"OnTrigger" "payload_coordinator,FireUser3,,0,-1"
 	}
 	"origin" "-256 192 88"
 	editor
@@ -11385,25 +11385,6 @@ entity
 		"OnTrigger" "payload_coordinator,FireUser2,,0,-1"
 	}
 	"origin" "-155.872 60.8752 72"
-	editor
-	{
-		"color" "220 30 220"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "8122"
-	"classname" "logic_relay"
-	"StartDisabled" "0"
-	"targetname" "SetAttackerWin"
-	connections
-	{
-		"OnTrigger" "payload_coordinator,FireUser3,,0,-1"
-	}
-	"origin" "-123.872 60.8752 72"
 	editor
 	{
 		"color" "220 30 220"

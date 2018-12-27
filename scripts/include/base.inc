@@ -1,10 +1,8 @@
-/*
-    This is an accompanying plugin for a custom Neotokyo Payload game mode.
-    For map makers: see the comments on usage starting around line 25.
-    
-    An example .vmf with logic_relays implemented:
-    https://gist.githubusercontent.com/Rainyan/b1c48f048e15f62999aeb2f66f22e56b/raw/f29762a21ab1b04aecc97005c0ab17a7c500a5ed/nt_payload_plugin-relays.vmf
-*/
+#if defined _base_
+    #endinput
+#endif
+#define _base_
+
 
 #pragma semicolon 1
 
@@ -15,10 +13,12 @@
 #define PLUGIN_VERSION "0.2"
 #define DEBUG_PRINT_MORE_DETAILS
 
+
 enum {
     COORD_ATTACKER_IS_JINRAI = 0,
     COORD_ATTACKER_IS_NSF,
     COORD_ATTACKER_HAS_WON,
+    COORD_ADD_TIME,
     COORD_ENUM_COUNT
 };
 
@@ -38,7 +38,8 @@ new const String:g_sPayloadMapIdentifier[] = "pl";
 new const String:g_sCoordinatorOutputs[COORD_ENUM_COUNT][] = {
         "OnUser1",  // Set the attacker as Jinrai.
         "OnUser2",  // Set the attacker as NSF.
-        "OnUser3"   // Signal that the attacker has won the round.
+        "OnUser3",  // Signal that the attacker has won the round.
+        "OnUser4"   // Add time to timer -H
 };
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
@@ -52,129 +53,7 @@ int g_iCoordinatorEnt = 0;
 ConVar g_cRoundTime = null;
 Handle g_hDeadline = null;
 
-public Plugin myinfo = {
-    name = "NEOTOKYO° Payload",
-    description = "A custom Payload game mode for Neotokyo.",
-    version = PLUGIN_VERSION,
-    author = "Rain",
-    url = "https://gist.github.com/Rainyan/b1c48f048e15f62999aeb2f66f22e56b"
-};
 
-public void OnPluginStart()
-{
-    float minRoundTime, maxRoundTime;
-    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    if (!neoRoundTime) {
-        SetFailState("Failed to retrieve Neotokyo native round time cvar");
-    }
-    neoRoundTime.GetBounds(ConVarBound_Lower, minRoundTime);
-    neoRoundTime.GetBounds(ConVarBound_Upper, maxRoundTime);
-    delete neoRoundTime;
-
-    g_cRoundTime = CreateConVar("sm_neopayload_roundtime", "10",
-            "Payload round time, in minutes.", FCVAR_NOTIFY,
-            true, minRoundTime, true, maxRoundTime);
-    
-    CreateConVar("sm_neopayload_version", PLUGIN_VERSION,
-            "Neotokyo Payload plugin version.",
-            FCVAR_NOTIFY | FCVAR_DONTRECORD | FCVAR_SPONLY);
-
-    AutoExecConfig(true);
-    
-    HookConVarChange(g_cRoundTime, CvarChanged_PayloadRoundTime);
-    
-    HookEvent("game_round_start", Event_RoundStart);
-}
-
-public void OnConfigsExecuted()
-{
-    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    // DEBUG/TODO: Likely unneccessary, as this cvar is already asserted once in OnPluginStart
-    if (!neoRoundTime) {
-        SetFailState("Failed to retrieve Neotokyo native round time cvar");
-    }
-    neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
-    delete neoRoundTime;
-}
-
-public void OnMapStart()
-{
-    if (!IsPayloadMap()) {
-        UnloadSelf();
-    }
-}
-
-// Clear the coordinator output hooks before it gets destroyed.
-public void OnMapEnd()
-{
-    ClearEntHooks();
-}
-
-public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast)
-{
-    ClearEntHooks();
-    CreatePayloadCoordinator();
-    CreateTimer(2.0, Timer_DelayedSetRespawn, _, TIMER_FLAG_NO_MAPCHANGE);
-
-    if (g_hDeadline != null) {
-        LogError("%s g_hDeadline != null on Event_RoundStart - this should never happen.",
-                g_sPluginTag);
-        delete g_hDeadline;
-        g_hDeadline = null;
-    }
-    // Timers aren't exactly precise, so give a grace time of ~2 seconds
-    // before actual round end for triggering the defender victory.
-    g_hDeadline = CreateTimer(g_cRoundTime.FloatValue - 2.0, Timer_Deadline);
-    if (g_hDeadline == null) {
-        LogError("%s Failed to CreateTimer on Event_RoundStart", g_hDeadline);
-    }
-}
-
-// Delay respawn set to dodge native game rules overriding it on round start.
-public Action Timer_DelayedSetRespawn(Handle timer)
-{
-    SetRespawning(true);
-}
-
-// Deadline for delivering the Payload has passed; defenders win.
-public Action Timer_Deadline(Handle timer)
-{
-    /*  TODO: Because the defender win has to happen few seconds before
-        time runs out (because there aren't suitable events for it),
-        there should be a visual countdown for the defender victory,
-        so players get a sense of exactly how many seconds remain. */
-    DeclareVictory(GetDefendingTeam());
-}
-
-// Propagate payload roundtime cvar change to native game rules cvar.
-public void CvarChanged_PayloadRoundTime(ConVar convar, const char[] oldValue, const char[] newValue)
-{
-    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    // DEBUG/TODO: Likely unneccessary, as this cvar is already asserted once in OnPluginStart
-    if (!neoRoundTime) {
-        SetFailState("Failed to retrieve Neotokyo native round time cvar");
-    }
-    neoRoundTime.SetString(newValue, true, false);
-    delete neoRoundTime;
-}
-
-// Return whether the current map is a Payload map.
-bool IsPayloadMap()
-{
-#if defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
-    return true;
-#endif
-    decl String:mapName[128];
-    GetCurrentMap(mapName, sizeof(mapName));
-    
-    char buffers[3][100];
-    int splits = ExplodeString(mapName, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-    // Map name does not follow the "nt_mapname_gamemode" pattern.
-    if (splits < 2) {
-        return false;
-    }
-    return StrEqual(buffers[2], g_sPayloadMapIdentifier);
-}
 
 // Create a networked entity, and hook it for receiving events.
 void CreatePayloadCoordinator()
@@ -231,33 +110,6 @@ void ClearEntHooks()
     g_iCoordinatorEnt = 0;
 }
 
-// Convert the received output string into coordinator int enum value.
-int GetCoordEnum(const char[] output)
-{
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        if (StrEqual(g_sCoordinatorOutputs[i], output)) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-// Convert the coordinator's attacker enum into a NT team enum.
-int CoordEnumToTeamEnum(int coordEnum)
-{
-    if (coordEnum == COORD_ATTACKER_IS_JINRAI) {
-        return TEAM_JINRAI;
-    }
-    else if (coordEnum == COORD_ATTACKER_IS_NSF) {
-        return TEAM_NSF;
-    }
-    else {
-        LogError("%s CoordEnumToTeamEnum: invalid team coord enum (%i)",
-                g_sPluginTag, coordEnum);
-        return TEAM_NONE;
-    }
-}
-
 // Coordinate output events sent to coordinator from the map.
 public void CoordinatePayload(const char[] output, int caller,
         int activator, float delay)
@@ -304,32 +156,6 @@ void DeclareVictory(int team)
     }
 }
 
-// Kill all in team, and then cancel their XP loss and death increment.
-void SoftKillTeam(int team)
-{
-    for (int i = 1; i <= MaxClients; i++) {
-        if (!IsClientConnected(i) || !IsPlayerAlive(i)) {
-            continue;
-        }
-        if (GetClientTeam(i) == team) {
-            ForcePlayerSuicide(i);
-            SetPlayerDeaths(i, GetPlayerDeaths(i) - 1);
-            SetPlayerXP(i, GetPlayerXP(i) + 1);
-        }
-    }
-}
-
-// Set the attackers, according to the OnUserN enum
-void SetAttackingTeam(int team)
-{
-    if (team != TEAM_JINRAI && team != TEAM_NSF) {
-        ThrowError("Tried to set invalid attacker (%i)", team);
-    }
-
-    g_iAttacker = team;
-
-    PayloadMessage("Attacking team is now %s", g_sTeamNames[team]);
-}
 
 // Toggle respawning with Neotokyo's warmup game state.
 void SetRespawning(bool respawnEnabled)
@@ -357,17 +183,3 @@ void UnloadSelf()
     ServerCommand("sm plugins unload %s", thisPluginFilename);
 }
 
-int GetAttackingTeam()
-{
-    return g_iAttacker;
-}
-
-int GetDefendingTeam()
-{
-    return g_iAttacker == TEAM_JINRAI ? TEAM_NSF : TEAM_JINRAI;
-}
-
-int GetOppositeTeam(int team)
-{
-    return team == TEAM_JINRAI ? TEAM_NSF : TEAM_JINRAI;
-}
