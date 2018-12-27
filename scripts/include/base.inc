@@ -54,6 +54,16 @@ ConVar g_cRoundTime = null;
 Handle g_hDeadline = null;
 
 
+// Convert the received output string into coordinator int enum value.
+int GetCoordEnum(const char[] output)
+{
+    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
+        if (StrEqual(g_sCoordinatorOutputs[i], output)) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 // Create a networked entity, and hook it for receiving events.
 void CreatePayloadCoordinator()

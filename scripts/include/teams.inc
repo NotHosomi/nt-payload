@@ -4,16 +4,6 @@
 #define _teams_
 
 
-// Convert the received output string into coordinator int enum value.
-int GetCoordEnum(const char[] output)
-{
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        if (StrEqual(g_sCoordinatorOutputs[i], output)) {
-            return i;
-        }
-    }
-    return -1;
-}
 
 // Convert the coordinator's attacker enum into a NT team enum.
 int CoordEnumToTeamEnum(int coordEnum)
