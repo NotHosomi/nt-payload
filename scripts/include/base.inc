@@ -3,7 +3,7 @@
 #endif
 #define _base_
 
-#define PLUGIN_VERSION "0.2"
+#define PLUGIN_VERSION "0.3"
 
 #define DEBUG_PRINT_MORE_DETAILS
 #define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
