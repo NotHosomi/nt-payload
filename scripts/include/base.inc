@@ -16,16 +16,6 @@ enum {
     COORD_ENUM_COUNT
 };
 
-// Target name that the logic_relays should fire into to communicate with this plugin.
-// This entity should not exist in the map, as it is created at runtime by this plugin!
-new const String:g_sCoordinatorName[] = "payload_coordinator";
-
-#if !defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
-// Payload maps are identified by the naming convention nt_mapname_gamemode,
-// where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
-new const String:g_sPayloadMapIdentifier[] = "pl";
-#endif
-
 // Possible inputs to fire into the coordinator outputs.
 // OnUserN is triggered by firing the matching "FireUserN" input;
 // e.g. logic_relay --> FireUser3 --> payload_coordinator = trigger attacker victory.
@@ -67,6 +57,9 @@ void CreatePayloadCoordinator()
                 g_sPluginTag);
         ClearEntHooks();
     }
+    // Target name that the logic_relays should fire into to communicate with this plugin.
+    // This entity should not exist in the map, as it is created at runtime by this plugin!
+    new const String:coordinatorName[] = "payload_coordinator";
     // This could be any networked entity with a targetname field;
     // I chose teleport destination because it has no discernible side effects.
     g_iCoordinatorEnt = CreateEntityByName("info_teleport_destination");
@@ -74,7 +67,7 @@ void CreatePayloadCoordinator()
         SetFailState("Coordinator creation failed");
     }
     // Name the entity, so that Payload map logic can target fire events to it.
-    if (!DispatchKeyValue(g_iCoordinatorEnt, "targetname", g_sCoordinatorName)) {
+    if (!DispatchKeyValue(g_iCoordinatorEnt, "targetname", coordinatorName)) {
         SetFailState("Failed to dispatch targetname for coordinator");
     }
     // Hook the coordinator outputs.
@@ -205,6 +198,10 @@ void UnloadSelf()
 // Return whether the current map is a Payload map.
 bool IsPayloadMap()
 {
+    // Payload maps are identified by the naming convention nt_mapname_gamemode,
+    // where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
+    new const String:payload_id[] = "pl";
+
     decl String:mapName[128];
     GetCurrentMap(mapName, sizeof(mapName));
     
@@ -214,6 +211,6 @@ bool IsPayloadMap()
     if (splits < 2) {
         return false;
     }
-    return StrEqual(buffers[2], g_sPayloadMapIdentifier);
+    return StrEqual(buffers[2], payload_id);
 }
 #endif
