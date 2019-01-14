@@ -67,7 +67,8 @@ public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadca
     }
     // Timers aren't exactly precise, so give a grace time of ~2 seconds
     // before actual round end for triggering the defender victory.
-    g_hDeadline = CreateTimer(g_cRoundTime.FloatValue - 2.0, Timer_Deadline);
+    int timerInaccuracy = 2;
+    g_hDeadline = CreateTimer(g_cRoundTime.FloatValue * 60 - timerInaccuracy, Timer_Deadline);
     if (g_hDeadline == null) {
         LogError("%s Failed to CreateTimer on Event_RoundStart", g_hDeadline);
     }
