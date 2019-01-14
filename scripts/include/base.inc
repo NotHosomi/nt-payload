@@ -30,7 +30,6 @@ new const String:g_sCoordinatorName[] = "payload_coordinator";
 // Payload maps are identified by the naming convention nt_mapname_gamemode,
 // where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
 new const String:g_sPayloadMapIdentifier[] = "pl";
-#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
 
 // Possible inputs to fire into the coordinator outputs.
 // OnUserN is triggered by firing the matching "FireUserN" input;
