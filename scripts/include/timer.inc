@@ -19,6 +19,8 @@ public Action Timer_Deadline(Handle timer)
     
 
     DeclareVictory(GetDefendingTeam());
+    g_hDeadline = null;
+    return Plugin_Stop;
 }
 
 // Propagate payload roundtime cvar change to native game rules cvar.

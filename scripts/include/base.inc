@@ -142,27 +142,31 @@ public void CoordinatePayload(const char[] output, int caller,
 }
 
 // Cue the confetti.
-void DeclareVictory(int team)
+void DeclareVictory(int winner)
 {
-    // Kill the defenders' deadline timer when victory is declared.
-    if (g_hDeadline != null) {
-        delete g_hDeadline;
-        g_hDeadline = null; // TODO: Does delete null it already?
+    // If this is not a defender victory, the defender victory
+    // timer hasn't been called. We have to clear it manually.
+    // Don't call this if defenders won to avoid a double delete.
+    if (winner != GetDefendingTeam()) {
+        if (g_hDeadline != null) {
+            delete g_hDeadline;
+            g_hDeadline = null; // TODO: Does delete null it already?
+        }
     }
 
-    if (team != TEAM_JINRAI && team != TEAM_NSF) {
-        ThrowError("Declared winner with invalid team (%i)", team);
+    if (winner != TEAM_JINRAI && winner != TEAM_NSF) {
+        ThrowError("Declared winner with invalid team (%i)", winner);
     }
 
     // HACK/TODO: Just kill all losers for now to force round end.
     SetRespawning(false);
-    SoftKillTeam(GetOppositeTeam(team));
+    SoftKillTeam(GetOppositeTeam(winner));
 
-    if (team == GetAttackingTeam()) {
-        PayloadMessage("%s wins by delivering the payload!", g_sTeamNames[team]);
+    if (winner == GetAttackingTeam()) {
+        PayloadMessage("%s wins by delivering the payload!", g_sTeamNames[winner]);
     }
     else {
-        PayloadMessage("%s wins by defending the base!", g_sTeamNames[team]);
+        PayloadMessage("%s wins by defending the base!", g_sTeamNames[winner]);
     }
     
     ClearEntHooks();
