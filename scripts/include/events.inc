@@ -70,7 +70,7 @@ public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadca
     int timerInaccuracy = 2;
     g_hDeadline = CreateTimer(g_cRoundTime.FloatValue * 60 - timerInaccuracy, Timer_Deadline);
     if (g_hDeadline == null) {
-        LogError("%s Failed to CreateTimer on Event_RoundStart", g_hDeadline);
+        LogError("%s Failed to CreateTimer on Event_RoundStart", g_sPluginTag);
     }
 }
 
