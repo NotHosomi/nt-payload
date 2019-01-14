@@ -192,6 +192,7 @@ void SetRespawning(bool respawnEnabled)
     GameRules_SetProp("m_iGameState", gamestate);
 }
 
+#if !defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
 // Unload this plugin.
 void UnloadSelf()
 {
@@ -200,3 +201,19 @@ void UnloadSelf()
             sizeof(thisPluginFilename));
     ServerCommand("sm plugins unload %s", thisPluginFilename);
 }
+
+// Return whether the current map is a Payload map.
+bool IsPayloadMap()
+{
+    decl String:mapName[128];
+    GetCurrentMap(mapName, sizeof(mapName));
+    
+    char buffers[3][100];
+    int splits = ExplodeString(mapName, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+    // Map name does not follow the "nt_mapname_gamemode" pattern.
+    if (splits < 2) {
+        return false;
+    }
+    return StrEqual(buffers[2], g_sPayloadMapIdentifier);
+}
+#endif

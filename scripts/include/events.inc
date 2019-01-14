@@ -36,12 +36,14 @@ public void OnConfigsExecuted()
     delete neoRoundTime;
 }
 
+#if !defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
 public void OnMapStart()
 {
     if (!IsPayloadMap()) {
         UnloadSelf();
     }
 }
+#endif
 
 // Clear the coordinator output hooks before it gets destroyed.
 public void OnMapEnd()
@@ -70,22 +72,10 @@ public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadca
     }
 }
 
-
-// Return whether the current map is a Payload map.
-bool IsPayloadMap()
+// Propagate payload roundtime cvar change to native game rules cvar.
+public void CvarChanged_PayloadRoundTime(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-#if defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
-    return true;
-#else
-    decl String:mapName[128];
-    GetCurrentMap(mapName, sizeof(mapName));
-    
-    char buffers[3][100];
-    int splits = ExplodeString(mapName, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-    // Map name does not follow the "nt_mapname_gamemode" pattern.
-    if (splits < 2) {
-        return false;
-    }
-    return StrEqual(buffers[2], g_sPayloadMapIdentifier);
-#endif
+    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
+    neoRoundTime.SetString(newValue, true, false);
+    delete neoRoundTime;
 }

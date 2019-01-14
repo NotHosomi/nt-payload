@@ -22,11 +22,3 @@ public Action Timer_Deadline(Handle timer)
     g_hDeadline = null;
     return Plugin_Stop;
 }
-
-// Propagate payload roundtime cvar change to native game rules cvar.
-public void CvarChanged_PayloadRoundTime(ConVar convar, const char[] oldValue, const char[] newValue)
-{
-    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    neoRoundTime.SetString(newValue, true, false);
-    delete neoRoundTime;
-}
