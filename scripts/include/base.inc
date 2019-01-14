@@ -6,7 +6,7 @@
 #define PLUGIN_VERSION "0.3"
 
 #define DEBUG_PRINT_MORE_DETAILS
-#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
+//#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
 
 enum {
     COORD_ATTACKER_IS_JINRAI = 0,
@@ -170,7 +170,6 @@ void DeclareVictory(int winner)
     
     ClearEntHooks();
 }
-
 
 // Toggle respawning with Neotokyo's warmup game state.
 void SetRespawning(bool respawnEnabled)
