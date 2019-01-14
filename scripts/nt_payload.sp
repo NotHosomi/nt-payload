@@ -14,6 +14,8 @@
 
 #include "include/base.inc"
 #include "include/events.inc"
+#include "include/teams.inc"
+#include "include/timer.inc"
 
 #define PLUGIN_VERSION "0.2"
 #define DEBUG_PRINT_MORE_DETAILS

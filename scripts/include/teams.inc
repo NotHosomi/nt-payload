@@ -3,8 +3,6 @@
 #endif
 #define _teams_
 
-
-
 // Convert the coordinator's attacker enum into a NT team enum.
 int CoordEnumToTeamEnum(int coordEnum)
 {
