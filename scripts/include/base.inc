@@ -164,6 +164,8 @@ void DeclareVictory(int team)
     else {
         PayloadMessage("%s wins by defending the base!", g_sTeamNames[team]);
     }
+    
+    ClearEntHooks();
 }
 
 
