@@ -53,7 +53,7 @@ int GetAttackingTeam()
 
 int GetDefendingTeam()
 {
-    return g_iAttacker == TEAM_JINRAI ? TEAM_NSF : TEAM_JINRAI;
+    return GetOppositeTeam(GetAttackingTeam());
 }
 
 int GetOppositeTeam(int team)
