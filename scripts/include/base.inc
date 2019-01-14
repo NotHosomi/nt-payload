@@ -87,7 +87,8 @@ void CreatePayloadCoordinator()
 // Format and print Payload announcements with the plugin tag included.
 void PayloadMessage(const char[] message, any ...)
 {
-    int bufLen = strlen(message) + 1;
+    // TODO figure out how to nicely allocate just needed amount
+    int bufLen = strlen(message) + 512;
     decl String:buffer[bufLen];
     VFormat(buffer, bufLen, message, 2);
     PrintToChatAll("%s %s", g_sPluginTag, buffer);
@@ -96,7 +97,8 @@ void PayloadMessage(const char[] message, any ...)
 void PrintDebug(const char[] msg, any ...)
 {
 #if defined DEBUG_PRINT_MORE_DETAILS
-    int bufLen = strlen(msg) + 1;
+    // TODO figure out how to nicely allocate just needed amount
+    int bufLen = strlen(msg) + 512;
     decl String:buffer[bufLen];
     if (VFormat(buffer, bufLen, "[debug] %s", 2) > 0) {
         PrintToChatAll(buffer);
