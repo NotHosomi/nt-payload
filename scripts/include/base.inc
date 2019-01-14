@@ -152,7 +152,7 @@ void DeclareVictory(int winner)
     if (winner != GetDefendingTeam()) {
         if (g_hDeadline != null) {
             delete g_hDeadline;
-            g_hDeadline = null; // TODO: Does delete null it already?
+            g_hDeadline = null;
         }
     }
 

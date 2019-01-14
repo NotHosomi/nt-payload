@@ -32,10 +32,6 @@ public void OnPluginStart()
 public void OnConfigsExecuted()
 {
     ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    // DEBUG/TODO: Likely unneccessary, as this cvar is already asserted once in OnPluginStart
-    if (!neoRoundTime) {
-        SetFailState("Failed to retrieve Neotokyo native round time cvar");
-    }
     neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
     delete neoRoundTime;
 }

@@ -27,10 +27,6 @@ public Action Timer_Deadline(Handle timer)
 public void CvarChanged_PayloadRoundTime(ConVar convar, const char[] oldValue, const char[] newValue)
 {
     ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    // DEBUG/TODO: Likely unneccessary, as this cvar is already asserted once in OnPluginStart
-    if (!neoRoundTime) {
-        SetFailState("Failed to retrieve Neotokyo native round time cvar");
-    }
     neoRoundTime.SetString(newValue, true, false);
     delete neoRoundTime;
 }
