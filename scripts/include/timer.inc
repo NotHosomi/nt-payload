@@ -16,9 +16,30 @@ public Action Timer_Deadline(Handle timer)
         time runs out (because there aren't suitable events for it),
         there should be a visual countdown for the defender victory,
         so players get a sense of exactly how many seconds remain. */
+    if (g_hDeadlineCountdown != null) {
+        LogError("%s g_hDeadlineCountdown was not null!", g_sPluginTag);
+        delete g_hDeadlineCountdown;
+        g_hDeadlineCountdown = null;
+    }
     
-
-    DeclareVictory(GetDefendingTeam());
+    g_hDeadlineCountdown = CreateTimer(1.0, Timer_DeadlineCountdown, _, TIMER_REPEAT);
+    if (g_hDeadlineCountdown == null) {
+        LogError("%s Failed to create timer g_hDeadlineCountdown", g_sPluginTag);
+    }
+    
     g_hDeadline = null;
     return Plugin_Stop;
+}
+
+public Action Timer_DeadlineCountdown(Handle timer)
+{
+    static int countdown = countdownSecs;
+    if (countdown == 0) {
+        g_hDeadlineCountdown = null;
+        countdown = countdownSecs;
+        DeclareVictory(GetDefendingTeam());
+        return Plugin_Stop;
+    }
+    PayloadMessage("Time remaining: %i", countdown--);
+    return Plugin_Continue;
 }

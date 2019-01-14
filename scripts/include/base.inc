@@ -36,7 +36,11 @@ int g_iAttacker = TEAM_NONE;
 int g_iCoordinatorEnt = 0;
 
 ConVar g_cRoundTime = null;
+
 Handle g_hDeadline = null;
+Handle g_hDeadlineCountdown = null;
+
+const int countdownSecs = 10;
 
 // Convert the received output string into coordinator int enum value.
 int GetCoordEnum(const char[] output)
