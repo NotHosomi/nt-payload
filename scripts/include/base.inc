@@ -48,7 +48,6 @@ int g_iCoordinatorEnt = 0;
 ConVar g_cRoundTime = null;
 Handle g_hDeadline = null;
 
-
 // Convert the received output string into coordinator int enum value.
 int GetCoordEnum(const char[] output)
 {
@@ -95,9 +94,21 @@ void PayloadMessage(const char[] message, any ...)
     VFormat(buffer, sizeof(buffer), prettyMessage, 2);
 
     PrintToChatAll(buffer);
+    PrintDebug(buffer, sizeof(buffer));
+}
 
+void PrintDebug(const char[] msg, any ...)
+{
 #if defined DEBUG_PRINT_MORE_DETAILS
-    PrintToServer(buffer);
+    int bufLen = strlen(msg) + 1;
+    decl String:buffer[bufLen];
+    if (VFormat(buffer, bufLen, "[debug] %s", 2) > 0) {
+        PrintToChatAll(buffer);
+        PrintToServer(buffer);
+    }
+    else {
+        ThrowError("VFormat failed for %s", msg);
+    }
 #endif
 }
 
@@ -119,9 +130,7 @@ void ClearEntHooks()
 public void CoordinatePayload(const char[] output, int caller,
         int activator, float delay)
 {
-#if defined DEBUG_PRINT_MORE_DETAILS
-    PayloadMessage("(debug) CoordinatePayload: %s", output);
-#endif
+    PrintDebug("(debug) CoordinatePayload: %s", output);
 
     int coordEnum = GetCoordEnum(output);
     if (coordEnum == -1) {
