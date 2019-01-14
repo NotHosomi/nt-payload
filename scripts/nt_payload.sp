@@ -17,11 +17,6 @@
 #include "include/teams.inc"
 #include "include/timer.inc"
 
-#define PLUGIN_VERSION "0.2"
-
-#define DEBUG_PRINT_MORE_DETAILS
-#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
-
 public Plugin myinfo = {
     name = "NEOTOKYO° Payload",
     description = "A custom Payload gamemode for Neotokyo.",

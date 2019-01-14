@@ -79,7 +79,7 @@ bool IsPayloadMap()
 {
 #if defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
     return true;
-#endif
+#else
     decl String:mapName[128];
     GetCurrentMap(mapName, sizeof(mapName));
     
@@ -90,4 +90,5 @@ bool IsPayloadMap()
         return false;
     }
     return StrEqual(buffers[2], g_sPayloadMapIdentifier);
+#endif
 }

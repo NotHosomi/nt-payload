@@ -3,17 +3,10 @@
 #endif
 #define _base_
 
-
-#pragma semicolon 1
-
-#include <sourcemod>
-#include <sdktools>
-#include <neotokyo>
-
-
 #define PLUGIN_VERSION "0.2"
-#define DEBUG_PRINT_MORE_DETAILS
 
+#define DEBUG_PRINT_MORE_DETAILS
+#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
 
 enum {
     COORD_ATTACKER_IS_JINRAI = 0,
@@ -27,9 +20,11 @@ enum {
 // This entity should not exist in the map, as it is created at runtime by this plugin!
 new const String:g_sCoordinatorName[] = "payload_coordinator";
 
+#if !defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
 // Payload maps are identified by the naming convention nt_mapname_gamemode,
 // where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
 new const String:g_sPayloadMapIdentifier[] = "pl";
+#endif
 
 // Possible inputs to fire into the coordinator outputs.
 // OnUserN is triggered by firing the matching "FireUserN" input;
@@ -192,4 +187,3 @@ void UnloadSelf()
             sizeof(thisPluginFilename));
     ServerCommand("sm plugins unload %s", thisPluginFilename);
 }
-
