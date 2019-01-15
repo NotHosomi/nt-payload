@@ -91,12 +91,18 @@ int GetCoordEnum(const char[] output)
 void CreatePayloadCoordinators()
 {
     g_dpCoordFuncs.Reset();
+    
+    // Debug check, TODO: remove this
     for (int i = 0; i < g_iNumCoordinators; i++) {
         if (g_iCoordinatorEnt[i] > 0) {
-            LogError("%s CreatePayloadCoordinator: Called while g_iCoordinatorEnt[%i] > 0",
-                    g_sPluginTag, i);
-            ClearEntHooks(g_iCoordinatorEnt[i]);
+            PrintDebug("CreatePayloadCoordinator: \
+Called while g_iCoordinatorEnt[%i] > 0", i);
         }
+    }
+    
+    ClearEntHooks();
+    
+    for (int i = 0; i < g_iNumCoordinators; i++) {
         PrintDebug("Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
         // This could be any networked entity with a targetname field;
         // I chose teleport destination because it has no discernible side effects.
@@ -148,17 +154,20 @@ void PrintDebug(const char[] msg, any ...)
 }
 
 // Remove the entity hooks.
-void ClearEntHooks(int entity)
-{
-    if (!entity || !IsValidEntity(entity)) {
-        return;
+void ClearEntHooks()
+{        
+    g_dpCoordFuncs.Reset();
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        if (!g_iCoordinatorEnt[i] || !IsValidEntity(g_iCoordinatorEnt[i])) {
+            continue;
+        }
+        EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+        for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
+            UnhookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
+                entOutFunc);
+        }
+        g_iCoordinatorEnt[i] = 0;
     }
-    
-    for (int i = 0; i < MAX_COORDINATOR_INPUTS; i++) {
-        UnhookSingleEntityOutput(entity, g_sCoordinatorOutputs[i],
-            TeamControl);
-    }
-    entity = 0;
 }
 
 // Coordinate TeamControl output events sent to coordinator from the map.
@@ -287,9 +296,7 @@ void DeclareVictory(int winner)
         PayloadMessage("%s wins by defending the base!", g_sTeamNames[winner]);
     }
     
-    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        ClearEntHooks(g_iCoordinatorEnt[i]);
-    }
+    ClearEntHooks();
 }
 
 // Toggle respawning with Neotokyo's warmup game state.

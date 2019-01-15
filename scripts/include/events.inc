@@ -61,16 +61,12 @@ public void OnMapStart()
 // Clear the coordinators' output hooks before it gets destroyed.
 public void OnMapEnd()
 {
-    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        ClearEntHooks(g_iCoordinatorEnt[i]);
-    }
+    ClearEntHooks();
 }
 
 public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast)
 {
-    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        ClearEntHooks(g_iCoordinatorEnt[i]);
-    }
+    ClearEntHooks();
     CreatePayloadCoordinators(); // is the old coordinator deleted on round end? -H
     CreateTimer(2.0, Timer_DelayedSetRespawn, _, TIMER_FLAG_NO_MAPCHANGE);
     CreateDeadlineTimer();
