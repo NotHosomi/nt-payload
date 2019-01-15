@@ -3,6 +3,9 @@
 #endif
 #define _timer_
 
+// Bool flag to detect if we got interrupted by time extension.
+static bool _dirtyDeadlineTimer = false;
+
 // Delay respawn set to dodge native game rules overriding it on round start.
 public Action Timer_DelayedSetRespawn(Handle timer)
 {
@@ -23,6 +26,7 @@ public Action Timer_Deadline(Handle timer)
     }
     
     g_hDeadlineCountdown = CreateTimer(1.0, Timer_DeadlineCountdown, _, TIMER_REPEAT);
+    _dirtyDeadlineTimer = true;
     if (g_hDeadlineCountdown == null) {
         LogError("%s Failed to create timer g_hDeadlineCountdown", g_sPluginTag);
     }
@@ -34,9 +38,16 @@ public Action Timer_Deadline(Handle timer)
 public Action Timer_DeadlineCountdown(Handle timer)
 {
     static int countdown = countdownSecs;
-    if (countdown == 0) {
+    // Countdown was interrupted before it finished;
+    // revert value back to max.
+    if (_dirtyDeadlineTimer) {
+        countdown = countdownSecs;
+        _dirtyDeadlineTimer = false;
+    }
+    else if (countdown == 0) {
         g_hDeadlineCountdown = null;
         countdown = countdownSecs;
+        _dirtyDeadlineTimer = false;
         DeclareVictory(GetDefendingTeam());
         return Plugin_Stop;
     }

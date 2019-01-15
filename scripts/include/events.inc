@@ -73,22 +73,7 @@ public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadca
     }
     CreatePayloadCoordinators(); // is the old coordinator deleted on round end? -H
     CreateTimer(2.0, Timer_DelayedSetRespawn, _, TIMER_FLAG_NO_MAPCHANGE);
-
-    if (g_hDeadline != null) {
-        LogError("%s g_hDeadline != null on Event_RoundStart - this should never happen.",
-                g_sPluginTag);
-        delete g_hDeadline;
-        g_hDeadline = null;
-    }
-    // Timers aren't exactly precise, so give a grace time of ~2 seconds
-    // before actual round end for triggering the defender victory.
-    const int timerInaccuracy = 3;
-    g_hDeadline = CreateTimer(
-        g_cRoundTime.FloatValue * 60 - countdownSecs - timerInaccuracy,
-        Timer_Deadline);
-    if (g_hDeadline == null) {
-        LogError("%s Failed to CreateTimer on Event_RoundStart", g_sPluginTag);
-    }
+    CreateDeadlineTimer();
 }
 
 // Propagate payload roundtime cvar change to native game rules cvar.
