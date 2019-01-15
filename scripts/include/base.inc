@@ -8,24 +8,49 @@
 #define DEBUG_PRINT_MORE_DETAILS
 //#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
 
+#define MAX_COORDINATOR_INPUTS 4
+
 enum {
-    COORD_ATTACKER_IS_JINRAI = 0,
-    COORD_ATTACKER_IS_NSF,
-    COORD_ATTACKER_HAS_WON,
-    COORD_ADD_TIME,
-    COORD_ENUM_COUNT
+    TEAMCONTROL_ATTACKER_IS_JINRAI = 0,
+    TEAMCONTROL_ATTACKER_IS_NSF,
+    TEAMCONTROL_ATTACKER_HAS_WON,
+    TEAMCONTROL_ENUM_COUNT
+};
+
+enum {
+    TIMECONTROL_INCREMENT = 0,
+    TIMECONTROL_ENABLE_OVERTIME,
+    TIMECONTROL_DISABLE_OVERTIME,
+    TIMECONTROL_ANNOUNCE_PROGRESS,
+    TIMECONTROL_ENUM_COUNT
+};
+
+enum {
+    COORDINATOR_TEAMCONTROL = 0,
+    COORDINATOR_TIMECONTROL,
+    COORDINATOR_ENUM_COUNT
 };
 
 // Possible inputs to fire into the coordinator outputs.
 // OnUserN is triggered by firing the matching "FireUserN" input;
 // e.g. logic_relay --> FireUser3 --> payload_coordinator = trigger attacker victory.
 // Note that the attacker must be set by using FireUser1 or 2 before sending the win signal.
-new const String:g_sCoordinatorOutputs[COORD_ENUM_COUNT][] = {
-        "OnUser1",  // Set the attacker as Jinrai.
-        "OnUser2",  // Set the attacker as NSF.
-        "OnUser3",  // Signal that the attacker has won the round.
-        "OnUser4"   // Add time to timer -H
+new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
+        // TeamControl: Set the attacker as Jinrai.
+        // TimeControl: Increment deadline.
+        "OnUser1",
+        // TeamControl: Set the attacker as NSF.
+        // TimeControl: No operation.
+        "OnUser2",
+        // TeamControl: Signal that the attacker has won the round.
+        // TimeControl: No operation.
+        "OnUser3",
+        // TeamControl: No operation.
+        // TimeControl: No operation.
+        "OnUser4"
 };
+
+const int g_iNumCoordinators = 2;
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
@@ -33,7 +58,7 @@ new const String:g_sTeamNames[][] = {
 };
 
 int g_iAttacker = TEAM_NONE;
-int g_iCoordinatorEnt = 0;
+int g_iCoordinatorEnt[g_iNumCoordinators] = { 0 };
 
 ConVar g_cRoundTime = null;
 
@@ -42,10 +67,13 @@ Handle g_hDeadlineCountdown = null;
 
 const int countdownSecs = 10;
 
+DataPack g_dpCoordFuncs = null;
+
 // Convert the received output string into coordinator int enum value.
+// Can be cast into any coordinator enum.
 int GetCoordEnum(const char[] output)
 {
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
+    for (int i = 0; i < MAX_COORDINATOR_INPUTS; i++) {
         if (StrEqual(g_sCoordinatorOutputs[i], output)) {
             return i;
         }
@@ -54,30 +82,42 @@ int GetCoordEnum(const char[] output)
 }
 
 // Create a networked entity, and hook it for receiving events.
-void CreatePayloadCoordinator()
+void CreatePayloadCoordinators()
 {
-    if (g_iCoordinatorEnt > 0) {
-        LogError("%s CreatePayloadCoordinator: Called while g_iCoordinatorEnt > 0",
-                g_sPluginTag);
-        ClearEntHooks();
-    }
-    // Target name that the logic_relays should fire into to communicate with this plugin.
-    // This entity should not exist in the map, as it is created at runtime by this plugin!
-    new const String:coordinatorName[] = "payload_coordinator";
-    // This could be any networked entity with a targetname field;
-    // I chose teleport destination because it has no discernible side effects.
-    g_iCoordinatorEnt = CreateEntityByName("info_teleport_destination");
-    if (g_iCoordinatorEnt == -1) {
-        SetFailState("Coordinator creation failed");
-    }
-    // Name the entity, so that Payload map logic can target fire events to it.
-    if (!DispatchKeyValue(g_iCoordinatorEnt, "targetname", coordinatorName)) {
-        SetFailState("Failed to dispatch targetname for coordinator");
-    }
-    // Hook the coordinator outputs.
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        HookSingleEntityOutput(g_iCoordinatorEnt, g_sCoordinatorOutputs[i],
-                CoordinatePayload, false);
+    g_dpCoordFuncs.Reset();
+    for (int i = 0; i < g_iNumCoordinators; i++) {
+        if (g_iCoordinatorEnt[i] > 0) {
+            LogError("%s CreatePayloadCoordinator: Called while g_iCoordinatorEnt[%i] > 0",
+                    g_sPluginTag, i);
+            ClearEntHooks(g_iCoordinatorEnt[i]);
+        }
+        // Target name that the logic_relays should fire into to communicate with this plugin.
+        // These entities should not exist in the map, as it is created at runtime by this plugin!
+        char coordinatorName[22] = "payload_coordinator_";
+        char coordinatorSuffix[2];
+        IntToString(i + 1, coordinatorSuffix, sizeof(coordinatorSuffix));
+        StrCat(coordinatorName, sizeof(coordinatorName), coordinatorSuffix);
+        PrintDebug("Preparing to dispatch %s", coordinatorName);
+        // This could be any networked entity with a targetname field;
+        // I chose teleport destination because it has no discernible side effects.
+        g_iCoordinatorEnt[i] = CreateEntityByName("info_teleport_destination");
+        if (g_iCoordinatorEnt[i] == -1) {
+            SetFailState("Coordinator creation failed");
+        }
+        // Name the entity, so that Payload map logic can target fire events to it.
+        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname", coordinatorName)) {
+            SetFailState("Failed to dispatch targetname kv for coordinator");
+        }
+        if (!DispatchSpawn(g_iCoordinatorEnt[i])) {
+            SetFailState("Failed to dispatch spawn for coordinator");
+        }
+        // Hook the coordinator output.
+        EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+        for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
+            HookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
+                    entOutFunc, false);
+            //PrintDebug("Hooked %s to %s", g_iCoordinatorEnt[i], entOutFunc);
+        }
     }
 }
 
@@ -97,9 +137,9 @@ void PrintDebug(const char[] msg, any ...)
     // TODO figure out how to nicely allocate just needed amount
     int bufLen = strlen(msg) + 512;
     decl String:buffer[bufLen];
-    if (VFormat(buffer, bufLen, "[debug] %s", 2) > 0) {
-        PrintToChatAll(buffer);
-        PrintToServer(buffer);
+    if (VFormat(buffer, bufLen, msg, 2) > 0) {
+        PrintToChatAll("[debug] %s", buffer);
+        PrintToServer("[debug] %s", buffer);
     }
     else {
         ThrowError("VFormat failed for %s", msg);
@@ -108,36 +148,56 @@ void PrintDebug(const char[] msg, any ...)
 }
 
 // Remove the entity hooks.
-void ClearEntHooks()
+void ClearEntHooks(int entity)
 {
-    if (!g_iCoordinatorEnt || !IsValidEntity(g_iCoordinatorEnt)) {
+    if (!entity || !IsValidEntity(entity)) {
         return;
     }
     
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        UnhookSingleEntityOutput(g_iCoordinatorEnt, g_sCoordinatorOutputs[i],
-                CoordinatePayload);
+    for (int i = 0; i < MAX_COORDINATOR_INPUTS; i++) {
+        UnhookSingleEntityOutput(entity, g_sCoordinatorOutputs[i],
+            TeamControl);
     }
-    g_iCoordinatorEnt = 0;
+    entity = 0;
 }
 
-// Coordinate output events sent to coordinator from the map.
-public void CoordinatePayload(const char[] output, int caller,
+// Coordinate TeamControl output events sent to coordinator from the map.
+public void TeamControl(const char[] output, int caller,
         int activator, float delay)
 {
-    PrintDebug("(debug) CoordinatePayload: %s", output);
+    PrintDebug("TeamControl: %s", output);
 
-    int coordEnum = GetCoordEnum(output);
-    if (coordEnum == -1) {
+    int cmdEnum = GetCoordEnum(output);
+    if (cmdEnum == -1) {
         ThrowError("GetCoordEnum failed on output: %s", output);
     }
-    else if (coordEnum == COORD_ATTACKER_HAS_WON) {
+    else if (cmdEnum == TEAMCONTROL_ATTACKER_HAS_WON) {
         DeclareVictory(GetAttackingTeam());
     }
     else {
-        int team = CoordEnumToTeamEnum(coordEnum);
+        int team = CoordEnumToTeamEnum(cmdEnum);
         SetAttackingTeam(team);
     }
+}
+
+// Coordinate TimeControl output events sent to coordinator from the map.
+public void TimeControl(const char[] output, int caller,
+    int activator, float delay)
+{
+    PrintDebug("TimeControl: %s", output);
+    
+    int cmdEnum = GetCoordEnum(output);
+    if (cmdEnum == -1) {
+        ThrowError("GetCoordEnum failed on output: %s", output);
+    }
+    else if (cmdEnum == TIMECONTROL_INCREMENT) {
+        IncrementDeadline();
+    }
+}
+
+void IncrementDeadline()
+{
+    PrintDebug("Increment deadline triggered"); // TODO
 }
 
 // Cue the confetti.
@@ -168,7 +228,9 @@ void DeclareVictory(int winner)
         PayloadMessage("%s wins by defending the base!", g_sTeamNames[winner]);
     }
     
-    ClearEntHooks();
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        ClearEntHooks(g_iCoordinatorEnt[i]);
+    }
 }
 
 // Toggle respawning with Neotokyo's warmup game state.

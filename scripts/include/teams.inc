@@ -6,17 +6,15 @@
 // Convert the coordinator's attacker enum into a NT team enum.
 int CoordEnumToTeamEnum(int coordEnum)
 {
-    if (coordEnum == COORD_ATTACKER_IS_JINRAI) {
+    if (coordEnum == TEAMCONTROL_ATTACKER_IS_JINRAI) {
         return TEAM_JINRAI;
     }
-    else if (coordEnum == COORD_ATTACKER_IS_NSF) {
+    else if (coordEnum == TEAMCONTROL_ATTACKER_IS_NSF) {
         return TEAM_NSF;
     }
-    else {
-        LogError("%s CoordEnumToTeamEnum: invalid team coord enum (%i)",
-                g_sPluginTag, coordEnum);
-        return TEAM_NONE;
-    }
+    LogError("%s CoordEnumToTeamEnum: invalid team coord enum (%i)",
+        g_sPluginTag, coordEnum);
+    return TEAM_NONE;
 }
 
 // Kill all in team, and then cancel their XP loss and death increment.
