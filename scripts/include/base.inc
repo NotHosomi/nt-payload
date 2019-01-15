@@ -88,8 +88,6 @@ int GetCoordEnum(const char[] output)
 // Create a networked entity, and hook it for receiving events.
 void CreatePayloadCoordinators()
 {
-    g_dpCoordFuncs.Reset();
-    
     // Debug check, TODO: remove this
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         if (g_iCoordinatorEnt[i] > 0) {
@@ -100,6 +98,7 @@ Called while g_iCoordinatorEnt[%i] > 0", i);
     
     ClearEntHooks();
     
+    g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         PrintDebug("Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
         // This could be any networked entity with a targetname field;
