@@ -50,7 +50,7 @@ new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
         "OnUser4"
 };
 // Target names that the logic_relays should fire into to communicate with this plugin.
-// These entities should not exist in the map, as it is created at runtime by this plugin!
+// These entities should not exist in the map, as they are created at runtime by this plugin!
 new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
     "pl_coord_team_control",
     "pl_coord_time_control"
@@ -200,7 +200,7 @@ void IncrementDeadline()
     // Get round times
     float roundTimeLeft = GameRules_GetPropFloat("m_fRoundTimeLeft");
     // Change game internal round timer
-    const int increment = 1; // TODO cvar or something
+    const int increment = 30; // TODO cvar or something
     GameRules_SetPropFloat("m_fRoundTimeLeft", roundTimeLeft + increment);
     // Change plugin timer
     CreateDeadlineTimer(true, roundTimeLeft + increment);
