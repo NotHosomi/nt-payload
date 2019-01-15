@@ -56,15 +56,13 @@ new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
     "pl_coord_time_control"
 };
 
-const int g_iNumCoordinators = 2;
-
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
     "none", "spectator", "Jinrai", "NSF"
 };
 
 int g_iAttacker = TEAM_NONE;
-int g_iCoordinatorEnt[g_iNumCoordinators] = { 0 };
+int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
 ConVar g_cRoundTime = null;
 
@@ -93,7 +91,7 @@ void CreatePayloadCoordinators()
     g_dpCoordFuncs.Reset();
     
     // Debug check, TODO: remove this
-    for (int i = 0; i < g_iNumCoordinators; i++) {
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         if (g_iCoordinatorEnt[i] > 0) {
             PrintDebug("CreatePayloadCoordinator: \
 Called while g_iCoordinatorEnt[%i] > 0", i);
@@ -102,7 +100,7 @@ Called while g_iCoordinatorEnt[%i] > 0", i);
     
     ClearEntHooks();
     
-    for (int i = 0; i < g_iNumCoordinators; i++) {
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         PrintDebug("Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
         // This could be any networked entity with a targetname field;
         // I chose teleport destination because it has no discernible side effects.
