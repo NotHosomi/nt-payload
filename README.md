@@ -1,7 +1,9 @@
 ### PAYLOAD MAP-SIDE LOGIC
 
- For copy-pasting into a map, the spawnroom and the central room contain all required logic<br>
- (<b>TODO</b>: currently out of date with plugin v. 0.3+!)
+ For copy-pasting into a map, the spawnroom and the central room contain all required logic
+ 
+ <b>TODO</b>: currently out of date with plugin v. 0.3+!<br>
+ Input firing is described under <a href="#plugin-interactions">Plugin Interactions</a> below.
  
 
 ### MAPMAKERS MUST
