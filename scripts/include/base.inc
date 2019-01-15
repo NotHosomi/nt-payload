@@ -49,6 +49,12 @@ new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
         // TimeControl: No operation.
         "OnUser4"
 };
+// Target names that the logic_relays should fire into to communicate with this plugin.
+// These entities should not exist in the map, as it is created at runtime by this plugin!
+new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
+    "pl_coord_team_control",
+    "pl_coord_time_control"
+};
 
 const int g_iNumCoordinators = 2;
 
@@ -91,13 +97,7 @@ void CreatePayloadCoordinators()
                     g_sPluginTag, i);
             ClearEntHooks(g_iCoordinatorEnt[i]);
         }
-        // Target name that the logic_relays should fire into to communicate with this plugin.
-        // These entities should not exist in the map, as it is created at runtime by this plugin!
-        char coordinatorName[22] = "payload_coordinator_";
-        char coordinatorSuffix[2];
-        IntToString(i + 1, coordinatorSuffix, sizeof(coordinatorSuffix));
-        StrCat(coordinatorName, sizeof(coordinatorName), coordinatorSuffix);
-        PrintDebug("Preparing to dispatch %s", coordinatorName);
+        PrintDebug("Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
         // This could be any networked entity with a targetname field;
         // I chose teleport destination because it has no discernible side effects.
         g_iCoordinatorEnt[i] = CreateEntityByName("info_teleport_destination");
@@ -105,7 +105,7 @@ void CreatePayloadCoordinators()
             SetFailState("Coordinator creation failed");
         }
         // Name the entity, so that Payload map logic can target fire events to it.
-        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname", coordinatorName)) {
+        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname", g_sCoordinatorTargetname[i])) {
             SetFailState("Failed to dispatch targetname kv for coordinator");
         }
         if (!DispatchSpawn(g_iCoordinatorEnt[i])) {
