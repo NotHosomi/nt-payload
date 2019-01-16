@@ -164,7 +164,7 @@ void DeclareVictory(int winner)
         PayloadMessage(_, "%s wins by defending the base!", g_sTeamNames[winner]);
     }
     
-    ClearEntHooks();
+    EndPayload();
 }
 
 // Toggle respawning with Neotokyo's warmup game state.

@@ -61,7 +61,7 @@ public void OnMapStart()
 // Clear the coordinators' output hooks before it gets destroyed.
 public void OnMapEnd()
 {
-    ClearEntHooks();
+    EndPayload();
 }
 
 public void OnClientDisconnect_Post(int client)
@@ -79,17 +79,16 @@ public void OnClientDisconnect_Post(int client)
     }
     // The last player just disconnected. Stop the payload mode.
     if (players == 0) {
-        ClearEntHooks();
+        EndPayload();
         PrintDebug(false, "Last player just dc'd, stopping payload");
     }
 }
 
 public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast)
 {
-    ClearEntHooks();
-    CreatePayloadCoordinators(); // is the old coordinator deleted on round end? -H
+    EndPayload();
     CreateTimer(2.0, Timer_DelayedSetRespawn, _, TIMER_FLAG_NO_MAPCHANGE);
-    CreateDeadlineTimer();
+    StartPayload();
 }
 
 // Propagate payload roundtime cvar change to native game rules cvar.

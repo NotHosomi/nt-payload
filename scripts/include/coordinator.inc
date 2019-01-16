@@ -55,8 +55,18 @@ int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
 DataPack g_dpCoordFuncs = null;
 
+void StartPayload() {
+    CreatePayloadCoordinators();
+    CreateDeadlineTimer();
+}
+
+void EndPayload() {
+    ClearEntHooks();
+}
+
 // Create a networked entity, and hook it for receiving events.
-void CreatePayloadCoordinators()
+// TODO // is the old coordinator deleted on round end? -H
+static void CreatePayloadCoordinators()
 {
     // Debug check, TODO: remove this
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
@@ -107,7 +117,7 @@ int GetCoordEnum(const char[] output)
 }
 
 // Remove the entity hooks.
-void ClearEntHooks()
+static void ClearEntHooks()
 {        
     g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
