@@ -29,21 +29,12 @@ Handle g_hDeadlineCountdown = null;
 const int countdownSecs = 10;
 
 // Format and print Payload announcements with the plugin tag included.
-void PayloadMessage(bool onlyOnce = true, const char[] message, any ...)
+void PayloadMessage(const char[] message, any ...)
 {
     // TODO figure out how to nicely allocate just needed amount
     int bufLen = strlen(message) + 512;
     decl String:buffer[bufLen];
-    VFormat(buffer, bufLen, message, 3);
-    // Only continue if this message is different from the last one.
-    if (onlyOnce) {
-        static char lastMessage[1024];
-        bool wasEqual = StrEqual(buffer, lastMessage);
-        strcopy(lastMessage, sizeof(lastMessage), buffer);
-        if (wasEqual) {
-            return;
-        }
-    }
+    VFormat(buffer, bufLen, message, 2);
     PrintToChatAll("%s %s", g_sPluginTag, buffer);
 }
 
@@ -142,7 +133,7 @@ void DeclareVictory(int winner)
     EndPayload();
 
     if (winner != TEAM_JINRAI && winner != TEAM_NSF) {
-        PayloadMessage(false, "Error with win condition; payload disabled for this round!");
+        PayloadMessage("Error with win condition; payload disabled for this round!");
         ThrowError("Declared winner with invalid team (%i)", winner);
     }
 
@@ -151,10 +142,10 @@ void DeclareVictory(int winner)
     SoftKillTeam(GetOppositeTeam(winner));
 
     if (winner == GetAttackingTeam()) {
-        PayloadMessage(_, "%s wins by delivering the payload!", g_sTeamNames[winner]);
+        PayloadMessage("%s wins by delivering the payload!", g_sTeamNames[winner]);
     }
     else {
-        PayloadMessage(_, "%s wins by defending the base!", g_sTeamNames[winner]);
+        PayloadMessage("%s wins by defending the base!", g_sTeamNames[winner]);
     }
 }
 
@@ -166,10 +157,10 @@ void SetRespawning(bool respawnEnabled)
 
     if (respawnEnabled) {
         gamestate = respawn;
-        PayloadMessage(_, "Respawning is now enabled");
+        PayloadMessage("Respawning is now enabled");
     } else {
         gamestate = normal;
-        PayloadMessage(_, "Respawning is now disabled");
+        PayloadMessage("Respawning is now disabled");
     }
 
     GameRules_SetProp("m_iGameState", gamestate);

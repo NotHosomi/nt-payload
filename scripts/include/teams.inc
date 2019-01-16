@@ -43,7 +43,9 @@ void SetAttackingTeam(int team)
 
     g_iAttacker = team;
 
-    PayloadMessage(_, "Attacking team is now %s", g_sTeamNames[team]);
+    // Map maker has the responsibility to set their
+    // trigger to fire once per round to avoid message spam here.
+    PayloadMessage("Attacking team is now %s", g_sTeamNames[team]);
 }
 
 int GetAttackingTeam()
