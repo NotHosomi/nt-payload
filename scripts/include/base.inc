@@ -47,7 +47,7 @@ new const String:g_sTeamNames[][] = {
     "none", "spectator", "Jinrai", "NSF"
 };
 
-ConVar g_cRoundTime = null, g_hDeadlineExtendTime = null;
+ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null;
 
 Handle g_hDeadline = null, g_hDeadlineCountdown = null;
 
@@ -107,7 +107,7 @@ void IncrementDeadline()
 {
     // Get round times
     float roundTimeLeft = GameRules_GetPropFloat("m_fRoundTimeLeft");
-    float newTime = roundTimeLeft + g_hDeadlineExtendTime.IntValue;
+    float newTime = roundTimeLeft + g_cDeadlineExtendTime.IntValue;
     // Change game internal round timer
     GameRules_SetPropFloat("m_fRoundTimeLeft", newTime);
     // Change plugin timer

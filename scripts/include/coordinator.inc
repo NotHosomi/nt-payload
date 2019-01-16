@@ -176,6 +176,6 @@ public void TimeControl(const char[] output, int caller,
         IncrementDeadline();
         PayloadMessage(
             "Attackers have gained %i more seconds by reaching a checkpoint!",
-            g_hDeadlineExtendTime.IntValue);
+            g_cDeadlineExtendTime.IntValue);
     }
 }
