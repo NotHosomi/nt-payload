@@ -13,6 +13,7 @@
 #include <neotokyo>
 
 #include "include/base.inc"
+#include "include/coordinator.inc"
 #include "include/events.inc"
 #include "include/teams.inc"
 #include "include/timer.inc"

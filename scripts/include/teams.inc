@@ -3,6 +3,8 @@
 #endif
 #define _teams_
 
+static int g_iAttacker = TEAM_NONE;
+
 // Convert the coordinator's attacker enum into a NT team enum.
 int CoordEnumToTeamEnum(int coordEnum)
 {
@@ -41,7 +43,7 @@ void SetAttackingTeam(int team)
 
     g_iAttacker = team;
 
-    PayloadMessage("Attacking team is now %s", g_sTeamNames[team]);
+    PayloadMessage(_, "Attacking team is now %s", g_sTeamNames[team]);
 }
 
 int GetAttackingTeam()

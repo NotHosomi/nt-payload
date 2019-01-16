@@ -51,6 +51,6 @@ public Action Timer_DeadlineCountdown(Handle timer)
         DeclareVictory(GetDefendingTeam());
         return Plugin_Stop;
     }
-    PayloadMessage("Time remaining: %i", countdown--);
+    PayloadMessage(_, "Time remaining: %i", countdown--);
     return Plugin_Continue;
 }
