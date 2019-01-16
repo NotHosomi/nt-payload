@@ -5,28 +5,13 @@
 
 #define PLUGIN_VERSION "0.3"
 
-/////////////////////////////////////////////////////
-// Set debug verbosity level with one of these flags.
-// Only one of these should be defined.
-//
-// For public testing. Stores debug to server log
-// and displays it to players in console only.
-//#define DEBUGLVL_PUBLIC_TEST
-//
-// More verbose mode for public testing.
-// Also shows debug messages in text chat.
-//#define DEBUGLVL_PUBLIC_TEST_VERBOSE
-//
-// For development. Show all the debug everywhere.
-#define DEBUGLVL_DEV
-/////////////////////////////////////////////////////
-
+// Don't set these manually; they are controlled
+// by defining a DEBUGLVL in nt_payload.sp.
 #if !defined DEBUGLVL_DEV &&\
     !defined DEBUGLVL_PUBLIC_TEST &&\
     !defined DEBUGLVL_PUBLIC_TEST_VERBOSE
     #error "DEBUGLVL must be defined in base.inc!"
 #endif
-
 #if defined DEBUGLVL_DEV
     #if defined DEBUGLVL_PUBLIC_TEST ||\
         defined DEBUGLVL_PUBLIC_TEST_VERBOSE
