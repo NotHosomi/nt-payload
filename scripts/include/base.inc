@@ -5,49 +5,20 @@
 
 #define PLUGIN_VERSION "0.3"
 
-// Don't set these manually; they are controlled
-// by defining a DEBUGLVL in nt_payload.sp.
-#if !defined DEBUGLVL_DEV &&\
-    !defined DEBUGLVL_PUBLIC_TEST &&\
-    !defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-    #error "DEBUGLVL must be defined in nt_payload.sp"
-#endif
-#if defined DEBUGLVL_DEV
-    #if defined DEBUGLVL_PUBLIC_TEST ||\
-        defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-        #error "Only one DEBUGLVL can be defined in nt_payload.sp"
-    #endif
-    #define DEBUG_PRINT_TO_CHAT
-    #define DEBUG_PRINT_TO_CONSOLE
-    #define DEBUG_PRINT_TO_SERVER
-    #define DEBUG_PRINT_TO_LOG
-    #define DEBUG_BOT_PLAYERS_COUNT_AS_HUMANS
-    #define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
-#endif
-#if defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-    #if defined DEBUGLVL_DEV ||\
-        defined DEBUGLVL_PUBLIC_TEST
-        #error "Only one DEBUGLVL can be defined in nt_payload.sp"
-    #endif
-    #define DEBUG_PRINT_TO_CHAT
-    #define DEBUG_PRINT_TO_CONSOLE
-    #define DEBUG_PRINT_TO_LOG
-#endif
-#if defined DEBUGLVL_PUBLIC_TEST
-    #if defined DEBUGLVL_DEV ||\
-        defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-        #error "Only one DEBUGLVL can be defined in nt_payload.sp"
-    #endif
-    #define DEBUG_PRINT_TO_CONSOLE
-    #define DEBUG_PRINT_TO_LOG
-#endif
-
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
     "none", "spectator", "Jinrai", "NSF"
 };
 
-ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null;
+enum {
+    DEBUGLVL_NONE = 0,
+    DEBUGLVL_PUBLIC_TEST,
+    DEBUGLVL_PUBLIC_TEST_VERBOSE,
+    DEBUGLVL_DEV
+};
+
+ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
+    g_cDebugLvl = null;
 
 Handle g_hDeadline = null, g_hDeadlineCountdown = null;
 
@@ -66,10 +37,9 @@ void PayloadMessage(const char[] message, any ...)
 
 void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
 {
-#if defined DEBUG_PRINT_TO_CHAT ||\
-    defined DEBUG_PRINT_TO_CONSOLE ||\
-    defined DEBUG_PRINT_TO_SERVER ||\
-    defined DEBUG_PRINT_TO_LOG
+    if (g_cDebugLvl.IntValue == DEBUGLVL_NONE) {
+        return;
+    }
     // TODO figure out how to nicely allocate just needed amount
     int bufLen = strlen(msg) + 512;
     decl String:buffer[bufLen];
@@ -85,22 +55,16 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
             return;
         }
     }
-#if defined DEBUG_PRINT_TO_CHAT
-    PrintToChatAll("[debug] %s", buffer);
-#endif
-
-#if defined DEBUG_PRINT_TO_CONSOLE
-    PrintToConsoleAll("[debug] %s", buffer);
-#endif
-
-#if defined DEBUG_PRINT_TO_SERVER
-    PrintToServer("[debug] %s", buffer);
-#endif
-
-#if defined DEBUG_PRINT_TO_LOG
-    LogToFile("addons/sourcemod/logs/payload.log", buffer);
-#endif
-#endif
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_PUBLIC_TEST) {
+        PrintToConsoleAll("[debug] %s", buffer);
+        LogToFile("addons/sourcemod/logs/payload.log", buffer);
+    }
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_PUBLIC_TEST_VERBOSE) {
+        PrintToChatAll("[debug] %s", buffer);
+    }
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_DEV) {
+        PrintToServer("[debug] %s", buffer);
+    }
 }
 
 void IncrementDeadline()
