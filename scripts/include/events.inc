@@ -16,7 +16,6 @@ public void OnPluginStart()
     // and must include a EntityOutput pointer for each coordinator function!
     g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TeamControl));
     g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TimeControl));
-    PrintToServer("Wrote funcs");
 
     float minRoundTime, maxRoundTime;
     ConVar neoRoundTime = FindConVar("neo_round_timelimit");
