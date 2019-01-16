@@ -10,12 +10,12 @@
 #if !defined DEBUGLVL_DEV &&\
     !defined DEBUGLVL_PUBLIC_TEST &&\
     !defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-    #error "DEBUGLVL must be defined in base.inc!"
+    #error "DEBUGLVL must be defined in nt_payload.sp"
 #endif
 #if defined DEBUGLVL_DEV
     #if defined DEBUGLVL_PUBLIC_TEST ||\
         defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-        #error "Only one DEBUGLVL can be defined in base.inc"
+        #error "Only one DEBUGLVL can be defined in nt_payload.sp"
     #endif
     #define DEBUG_PRINT_TO_CHAT
     #define DEBUG_PRINT_TO_CONSOLE
@@ -27,7 +27,7 @@
 #if defined DEBUGLVL_PUBLIC_TEST_VERBOSE
     #if defined DEBUGLVL_DEV ||\
         defined DEBUGLVL_PUBLIC_TEST
-        #error "Only one DEBUGLVL can be defined in base.inc"
+        #error "Only one DEBUGLVL can be defined in nt_payload.sp"
     #endif
     #define DEBUG_PRINT_TO_CHAT
     #define DEBUG_PRINT_TO_CONSOLE
@@ -36,7 +36,7 @@
 #if defined DEBUGLVL_PUBLIC_TEST
     #if defined DEBUGLVL_DEV ||\
         defined DEBUGLVL_PUBLIC_TEST_VERBOSE
-        #error "Only one DEBUGLVL can be defined in base.inc"
+        #error "Only one DEBUGLVL can be defined in nt_payload.sp"
     #endif
     #define DEBUG_PRINT_TO_CONSOLE
     #define DEBUG_PRINT_TO_LOG
