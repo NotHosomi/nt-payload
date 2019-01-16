@@ -9,6 +9,7 @@
 #define DEBUG_PRINT_TO_CHAT
 #define DEBUG_PRINT_TO_CONSOLE
 #define DEBUG_PRINT_TO_SERVER
+#define DEBUG_PRINT_TO_LOG
 
 // Uncomment to disable the map name check.
 //#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
@@ -44,7 +45,8 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
 {
 #if defined DEBUG_PRINT_TO_CHAT ||\
     defined DEBUG_PRINT_TO_CONSOLE ||\
-    defined DEBUG_PRINT_TO_SERVER
+    defined DEBUG_PRINT_TO_SERVER ||\
+    defined DEBUG_PRINT_TO_LOG
     // TODO figure out how to nicely allocate just needed amount
     int bufLen = strlen(msg) + 512;
     decl String:buffer[bufLen];
@@ -70,6 +72,10 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
 
 #if defined DEBUG_PRINT_TO_SERVER
     PrintToServer("[debug] %s", buffer);
+#endif
+
+#if defined DEBUG_PRINT_TO_LOG
+    LogToFile("addons/sourcemod/logs/payload.log", buffer);
 #endif
 #endif
 }
