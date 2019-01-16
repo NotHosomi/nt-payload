@@ -5,18 +5,57 @@
 
 #define PLUGIN_VERSION "0.3"
 
-// Uncomment to disable verbose debug messages.
-#define DEBUG_PRINT_TO_CHAT
-#define DEBUG_PRINT_TO_CONSOLE
-#define DEBUG_PRINT_TO_SERVER
-#define DEBUG_PRINT_TO_LOG
+/////////////////////////////////////////////////////
+// Set debug verbosity level with one of these flags.
+// Only one of these should be defined.
+//
+// For public testing. Stores debug to server log
+// and displays it to players in console only.
+//#define DEBUGLVL_PUBLIC_TEST
+//
+// More verbose mode for public testing.
+// Also shows debug messages in text chat.
+//#define DEBUGLVL_PUBLIC_TEST_VERBOSE
+//
+// For development. Show all the debug everywhere.
+#define DEBUGLVL_DEV
+/////////////////////////////////////////////////////
 
-// Uncomment to disable the map name check.
-//#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
+#if !defined DEBUGLVL_DEV &&\
+    !defined DEBUGLVL_PUBLIC_TEST &&\
+    !defined DEBUGLVL_PUBLIC_TEST_VERBOSE
+    #error "DEBUGLVL must be defined in base.inc!"
+#endif
 
-// Uncomment to keep bot payload going even if all humans disconnected.
-// SourceTV bot is always ignored.
-//#define DEBUG_BOT_PLAYERS_COUNT_AS_HUMANS
+#if defined DEBUGLVL_DEV
+    #if defined DEBUGLVL_PUBLIC_TEST ||\
+        defined DEBUGLVL_PUBLIC_TEST_VERBOSE
+        #error "Only one DEBUGLVL can be defined in base.inc"
+    #endif
+    #define DEBUG_PRINT_TO_CHAT
+    #define DEBUG_PRINT_TO_CONSOLE
+    #define DEBUG_PRINT_TO_SERVER
+    #define DEBUG_PRINT_TO_LOG
+    #define DEBUG_BOT_PLAYERS_COUNT_AS_HUMANS
+    #define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
+#endif
+#if defined DEBUGLVL_PUBLIC_TEST_VERBOSE
+    #if defined DEBUGLVL_DEV ||\
+        defined DEBUGLVL_PUBLIC_TEST
+        #error "Only one DEBUGLVL can be defined in base.inc"
+    #endif
+    #define DEBUG_PRINT_TO_CHAT
+    #define DEBUG_PRINT_TO_CONSOLE
+    #define DEBUG_PRINT_TO_LOG
+#endif
+#if defined DEBUGLVL_PUBLIC_TEST
+    #if defined DEBUGLVL_DEV ||\
+        defined DEBUGLVL_PUBLIC_TEST_VERBOSE
+        #error "Only one DEBUGLVL can be defined in base.inc"
+    #endif
+    #define DEBUG_PRINT_TO_CONSOLE
+    #define DEBUG_PRINT_TO_LOG
+#endif
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
