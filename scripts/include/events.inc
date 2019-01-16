@@ -64,6 +64,26 @@ public void OnMapEnd()
     ClearEntHooks();
 }
 
+public void OnClientDisconnect_Post(int client)
+{
+    int players = 0;
+    for (int c = 1; c <= MaxClients; c++) {
+        if (IsClientInGame(c) && !IsClientSourceTV(c)) {
+#if !defined DEBUG_BOT_PLAYERS_COUNT_AS_HUMANS
+            if (IsFakeClient(c)) {
+                continue;
+            }
+#endif
+            players++;
+        }
+    }
+    // The last player just disconnected. Stop the payload mode.
+    if (players == 0) {
+        ClearEntHooks();
+        PrintDebug(false, "Last player just dc'd, stopping payload");
+    }
+}
+
 public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast)
 {
     ClearEntHooks();

@@ -5,8 +5,15 @@
 
 #define PLUGIN_VERSION "0.3"
 
+// Uncomment to disable verbose debug messages.
 #define DEBUG_PRINT_MORE_DETAILS
-//#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
+
+// Uncomment to disable the map name check.
+//#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
+
+// Uncomment to keep bot payload going even if all humans disconnected.
+// SourceTV bot is always ignored.
+//#define DEBUG_BOT_PLAYERS_COUNT_AS_HUMANS
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
