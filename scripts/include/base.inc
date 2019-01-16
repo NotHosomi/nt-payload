@@ -114,13 +114,15 @@ void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs
             // TODO: kind of messy, this should probably live in IncrementDeadline.
             GameRules_SetPropFloat("m_fRoundTimeLeft", minimumTimerLen);
         }
-        g_hDeadline = CreateTimer(customTimeSecs - countdownSecs - timerInaccuracy, Timer_Deadline);
+        g_hDeadline = CreateTimer(
+            customTimeSecs - countdownSecs - timerInaccuracy,
+            Timer_Deadline, TIMER_FLAG_NO_MAPCHANGE);
     }
     // Else, assume we want a full round timer.
     else {
         g_hDeadline = CreateTimer(
             g_cRoundTime.FloatValue * 60 - countdownSecs - timerInaccuracy,
-            Timer_Deadline);
+            Timer_Deadline, TIMER_FLAG_NO_MAPCHANGE);
     }
     if (g_hDeadline == null) {
         LogError("%s Failed to CreateTimer on Event_RoundStart", g_sPluginTag);

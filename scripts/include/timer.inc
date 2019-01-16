@@ -25,7 +25,8 @@ public Action Timer_Deadline(Handle timer)
         g_hDeadlineCountdown = null;
     }
     
-    g_hDeadlineCountdown = CreateTimer(1.0, Timer_DeadlineCountdown, _, TIMER_REPEAT);
+    g_hDeadlineCountdown = CreateTimer(1.0, Timer_DeadlineCountdown, _,
+        TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
     _dirtyDeadlineTimer = true;
     if (g_hDeadlineCountdown == null) {
         LogError("%s Failed to create timer g_hDeadlineCountdown", g_sPluginTag);
