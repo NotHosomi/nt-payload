@@ -140,7 +140,7 @@ void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs
         delete g_hDeadlineCountdown;
         g_hDeadlineCountdown = null;
     }
-    // Timers aren't exactly precise, so give a grace time of ~2 seconds
+    // Timers aren't exactly precise, so give a grace time of a few seconds
     // before actual round end for triggering the defender victory.
     const float timerInaccuracy = 3.0;
     // User provided their own round time remaining to use.
