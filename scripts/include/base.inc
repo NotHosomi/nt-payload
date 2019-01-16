@@ -46,7 +46,7 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
     // TODO figure out how to nicely allocate just needed amount
     int bufLen = strlen(msg) + 512;
     decl String:buffer[bufLen];
-    if (VFormat(buffer, bufLen, msg, 2) < 1) {
+    if (VFormat(buffer, bufLen, msg, 3) < 1) {
         ThrowError("VFormat failed for %s", msg);
     }
     // Only continue if this message is different from the last one.
