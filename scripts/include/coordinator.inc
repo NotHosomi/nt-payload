@@ -61,6 +61,16 @@ void StartPayload() {
 }
 
 void EndPayload() {
+    // Clear the timers.
+    if (g_hDeadline != null) {
+        delete g_hDeadline;
+        g_hDeadline = null;
+    }
+    if (g_hDeadlineCountdown != null) {
+        delete g_hDeadlineCountdown;
+        g_hDeadlineCountdown = null;
+    }
+
     ClearEntHooks();
 }
 

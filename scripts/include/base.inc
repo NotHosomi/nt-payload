@@ -139,17 +139,10 @@ void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs
 // Cue the confetti.
 void DeclareVictory(int winner)
 {
-    // If this is not a defender victory, the defender victory
-    // timer hasn't been called. We have to clear it manually.
-    // Don't call this if defenders won to avoid a double delete.
-    if (winner != GetDefendingTeam()) {
-        if (g_hDeadline != null) {
-            delete g_hDeadline;
-            g_hDeadline = null;
-        }
-    }
+    EndPayload();
 
     if (winner != TEAM_JINRAI && winner != TEAM_NSF) {
+        PayloadMessage(false, "Error with win condition; payload disabled for this round!");
         ThrowError("Declared winner with invalid team (%i)", winner);
     }
 
@@ -163,8 +156,6 @@ void DeclareVictory(int winner)
     else {
         PayloadMessage(_, "%s wins by defending the base!", g_sTeamNames[winner]);
     }
-    
-    EndPayload();
 }
 
 // Toggle respawning with Neotokyo's warmup game state.
