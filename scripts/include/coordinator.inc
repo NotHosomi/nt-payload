@@ -174,9 +174,8 @@ public void TimeControl(const char[] output, int caller,
     }
     else if (cmdEnum == TIMECONTROL_INCREMENT) {
         IncrementDeadline();
-        const int increment = 30; // TODO cvar or something
         PayloadMessage(
             "Attackers have gained %i more seconds by reaching a checkpoint!",
-            increment);
+            g_hDeadlineExtendTime.IntValue);
     }
 }

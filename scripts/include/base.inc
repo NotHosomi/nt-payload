@@ -47,10 +47,9 @@ new const String:g_sTeamNames[][] = {
     "none", "spectator", "Jinrai", "NSF"
 };
 
-ConVar g_cRoundTime = null;
+ConVar g_cRoundTime = null, g_hDeadlineExtendTime = null;
 
-Handle g_hDeadline = null;
-Handle g_hDeadlineCountdown = null;
+Handle g_hDeadline = null, g_hDeadlineCountdown = null;
 
 // Once the deadline ends, count down from this value to defender victory.
 const int countdownSecs = 10;
@@ -108,12 +107,12 @@ void IncrementDeadline()
 {
     // Get round times
     float roundTimeLeft = GameRules_GetPropFloat("m_fRoundTimeLeft");
+    float newTime = roundTimeLeft + g_hDeadlineExtendTime.IntValue;
     // Change game internal round timer
-    const int increment = 30; // TODO cvar or something
-    GameRules_SetPropFloat("m_fRoundTimeLeft", roundTimeLeft + increment);
+    GameRules_SetPropFloat("m_fRoundTimeLeft", newTime);
     // Change plugin timer
-    CreateDeadlineTimer(true, roundTimeLeft + increment);
-    PrintDebug(_, "Called CreateDeadlineTimer with %f time", roundTimeLeft + increment);
+    CreateDeadlineTimer(true, newTime);
+    PrintDebug(_, "Called CreateDeadlineTimer with %f time", newTime);
 }
 
 // Delete any existing deadline timers, and create a new one.

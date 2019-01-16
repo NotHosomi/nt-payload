@@ -33,7 +33,11 @@ public void OnPluginStart()
     CreateConVar("sm_neopayload_version", PLUGIN_VERSION,
             "Neotokyo Payload plugin version.",
             FCVAR_NOTIFY | FCVAR_DONTRECORD | FCVAR_SPONLY);
-
+    
+    g_hDeadlineExtendTime = CreateConVar("sm_neopayload_deadline_extend_time", "30",
+        "How much to extend payload deadline upon attackers reaching \
+a checkpoint, in seconds.", FCVAR_NOTIFY, true, 0.0, true, maxRoundTime);
+    
     AutoExecConfig(true);
     
     HookConVarChange(g_cRoundTime, CvarChanged_PayloadRoundTime);
