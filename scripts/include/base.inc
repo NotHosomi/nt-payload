@@ -6,7 +6,9 @@
 #define PLUGIN_VERSION "0.3"
 
 // Uncomment to disable verbose debug messages.
-#define DEBUG_PRINT_MORE_DETAILS
+#define DEBUG_PRINT_TO_CHAT
+#define DEBUG_PRINT_TO_CONSOLE
+#define DEBUG_PRINT_TO_SERVER
 
 // Uncomment to disable the map name check.
 //#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
@@ -40,7 +42,9 @@ void PayloadMessage(const char[] message, any ...)
 
 void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
 {
-#if defined DEBUG_PRINT_MORE_DETAILS
+#if defined DEBUG_PRINT_TO_CHAT ||\
+    defined DEBUG_PRINT_TO_CONSOLE ||\
+    defined DEBUG_PRINT_TO_SERVER
     // TODO figure out how to nicely allocate just needed amount
     int bufLen = strlen(msg) + 512;
     decl String:buffer[bufLen];
@@ -56,8 +60,17 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
             return;
         }
     }
+#if defined DEBUG_PRINT_TO_CHAT
     PrintToChatAll("[debug] %s", buffer);
+#endif
+
+#if defined DEBUG_PRINT_TO_CONSOLE
+    PrintToConsoleAll("[debug] %s", buffer);
+#endif
+
+#if defined DEBUG_PRINT_TO_SERVER
     PrintToServer("[debug] %s", buffer);
+#endif
 #endif
 }
 
