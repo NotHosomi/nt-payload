@@ -48,7 +48,7 @@
        <i>pl_coord_time_control</i> coordinator. this tells the plugin that attackers
        are qualified to an overtime if the time runs out.
      * when all attackers have left the payload push area, send a <i>FireUser2</i> to
-       <i>pl_coord_time_control</i> coordinator. this tells the plugins that attackers
+       <i>pl_coord_time_control</i> coordinator. this tells the plugin that attackers
        are no longer qualified to an overtime if the time runs out.
      * map needn't worry about the overtime logic, this is handled plugin side.
        these inputs can be safely fired even if it isn't overtime yet.
