@@ -102,7 +102,7 @@ public void OnClientDisconnect_Post(int client)
 
 public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast)
 {
-    EndPayload();
+    EndPayload();    
     CreateTimer(2.0, Timer_DelayedSetRespawn, _, TIMER_FLAG_NO_MAPCHANGE);
     StartPayload();
 }

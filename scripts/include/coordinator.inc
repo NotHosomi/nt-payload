@@ -50,6 +50,9 @@ new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
     "pl_coord_team_control",
     "pl_coord_time_control"
 };
+// This could be any networked entity with a targetname field;
+// I chose teleport destination because it has no discernible side effects.
+new const String:g_sCoordinatorClassName[] = "info_teleport_destination";
 
 int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
@@ -69,6 +72,36 @@ void EndPayload() {
     if (g_hDeadlineCountdown != null) {
         delete g_hDeadlineCountdown;
         g_hDeadlineCountdown = null;
+    }
+    // Coordinators are cleared on newround.
+    // Still doing the check here in case we got unloaded unexpectedly.
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        if (g_iCoordinatorEnt[i] == 0) {
+            PrintDebug(_, "Coord %i was already 0", i);
+            continue;
+        }
+        if (IsValidEntity(g_iCoordinatorEnt[i])) {
+            decl String:entName[sizeof(g_sCoordinatorClassName)];
+            if (!GetEntityClassname(g_iCoordinatorEnt[i],
+                entName, sizeof(entName))) {
+                LogError(
+                    "%s Failed to fetch previous coordinator classname from %i",
+                    g_sPluginTag, i);
+            }
+            else {
+                PrintDebug(_, "Got valid coord %i with classname %s", i, entName);
+                if (StrEqual(entName, g_sCoordinatorClassName)) {
+                    if (!AcceptEntityInput(g_iCoordinatorEnt[i], "kill")) {
+                        LogError("%s Failed to kill previous coordinator %s",
+                            g_sPluginTag, g_sCoordinatorClassName);
+                    }
+                    else {
+                        PrintDebug(_, "Coordinator %i kill ok", i);
+                    }
+                }
+            }
+        }
+        g_iCoordinatorEnt[i] = 0;
     }
 
     ClearEntHooks();
@@ -91,9 +124,7 @@ Called while g_iCoordinatorEnt[%i] > 0", i);
     g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         PrintDebug(_, "Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
-        // This could be any networked entity with a targetname field;
-        // I chose teleport destination because it has no discernible side effects.
-        g_iCoordinatorEnt[i] = CreateEntityByName("info_teleport_destination");
+        g_iCoordinatorEnt[i] = CreateEntityByName(g_sCoordinatorClassName);
         if (g_iCoordinatorEnt[i] == -1) {
             SetFailState("Coordinator creation failed");
         }
