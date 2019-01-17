@@ -155,7 +155,9 @@ public Action Timer_Overtime(Handle timer)
         _dirtyOvertimeTimer = false;
     }
     if (GetIsQualifiedForOvertime()) {
-        if (secsSinceAnnounce++ >= announceInterval) {
+        if (secsSinceAnnounce == 0 ||
+            secsSinceAnnounce++ >= announceInterval)
+        {
             PayloadMessage("Overtime!");
             secsSinceAnnounce = 0;
         }
