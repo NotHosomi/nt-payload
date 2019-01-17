@@ -32,6 +32,12 @@
  * Add time when each capturepoint logic_relay is triggered.
      * this is done with a <i>FireUser1</i> call to <i>"pl_coord_time_control"</i> coordinator
  
+ * Announce attacker progress percentage each time a payload path_track is passed.
+     * map needs no triggers for this; it's done automatically by capturing the path nodes'
+       <i>OnPass</i> output, as long as the pl paths follow a <i>pl_path_N</i> naming scheme,
+       where N is a whole number and all the nodes follow it incrementally,
+       ie. <i>pl_path_1, pl_path_2, ...</i>
+ 
  * End the game when the logic_relay AttackerWin is triggered
      * this is done with <i>FireUser1</i> (Jinrai), or <i>FireUser2</i> (NSF) to set attacker at round begin...
      * ...followed by <i>FireUser3</i> when the attacker deliver the payload to trigger the victory
