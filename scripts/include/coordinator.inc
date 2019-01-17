@@ -75,7 +75,6 @@ void EndPayload() {
 }
 
 // Create a networked entity, and hook it for receiving events.
-// TODO // is the old coordinator deleted on round end? -H
 static void CreatePayloadCoordinators()
 {
     // Debug check, TODO: remove this
