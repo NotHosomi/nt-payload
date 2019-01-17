@@ -59,8 +59,8 @@ new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
 new const String:g_sCoordinatorClassName[] = "info_teleport_destination";
 // Payload path nodes are recognized by this naming, followed by an
 // increasing number, ie. pl_path_1, pl_path_2...
-// Node link is allowed to start from any unsigned 32 bit integer,
-// albeit 1 and 0 are probably the most understandable choices.
+// Node link is allowed to span anywhere in range 0-999,
+// althought starting with 1 or 0 is probably most readable.
 new const String:g_sPayloadPathNode[] = "pl_path_";
 // Metadata about the payload version a map was built for.
 // Payload map must have a info_teleport_destination with its
@@ -136,7 +136,7 @@ int LookupPathNodes()
 {
     int maxEdicts = GetMaxEntities();
     int lowestNode = maxEdicts + 1;
-    decl String:entName[11]; // strlen("path_track") + 1 TODO: this len allows only 100 nodes max, increase to 1000 range?
+    decl String:entName[12]; // strlen("path_track") + 1
     for (int i = 1; i <= maxEdicts; i++) {
         if (!IsValidEntity(i)) {
             continue;
