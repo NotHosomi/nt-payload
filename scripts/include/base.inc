@@ -71,6 +71,27 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
     }
 }
 
+// Takes currently passed node position (starting from 1),
+// and the total amount of payload nodes in the map.
+// Announces the percentage of the payload track completed.
+// TODO: calculate node distances to get an accurate reading;
+// currently this naïvely assumes nodes are equal distance
+// away from each other.
+void AnnounceNodePass(int nodePos, int numNodesTotal)
+{
+    if (numNodesTotal < 1) {
+        ThrowError("Got total nodes < 1");
+    }
+    else if (nodePos < 1) {
+        ThrowError("Got node pos < 1");
+    }
+    else if (nodePos > numNodesTotal) {
+        ThrowError("Got node pos higher than nodes total");
+    }
+    int percentComplete = RoundToNearest(100.0 * nodePos / numNodesTotal);
+    PayloadMessage("Attacker progress: %i\%", percentComplete);
+}
+
 void IncrementDeadline()
 {
     // Get round times

@@ -4,6 +4,7 @@
 #define _ntpl_coordinator_
 
 #define MAX_COORDINATOR_INPUTS 4
+#define MAX_PATH_NODES 128
 
 enum {
     COORDINATOR_TEAMCONTROL = 0,
@@ -57,14 +58,26 @@ new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
 // This could be any networked entity with a targetname field;
 // I chose teleport destination because it has no discernible side effects.
 new const String:g_sCoordinatorClassName[] = "info_teleport_destination";
+// Payload path nodes are recognized by this naming, followed by an
+// increasing number, ie. pl_path_1, pl_path_2...
+// Node link is allowed to start from any unsigned 32 bit integer,
+// albeit 1 and 0 are probably the most understandable choices.
+new const String:g_sPayloadPathNode[] = "pl_path_";
 
 int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
+
+int g_iPathNodes[MAX_PATH_NODES] = { 0 };
+static int iStartNode = -1;
 
 DataPack g_dpCoordFuncs = null;
 
 void StartPayload() {
     CreatePayloadCoordinators();
     CreateEntHooks();
+    iStartNode = LookupPathNodes();
+    if (iStartNode == -1) {
+        PrintDebug(_, "Path nodes lookup failed. Is this a valid payload map?");
+    }
     CreateDeadlineTimer();
 }
 
@@ -72,6 +85,66 @@ void EndPayload() {
     ClearTimers();
     ClearEntHooks();
     ClearPayloadCoordinators();
+    ClearPathNodes();
+}
+
+// TODO: run only once per map to avoid expensive string operations
+// Iterate map edicts, and find all path_track nodes
+// following the payload naming scheme.
+// If nodes were found, return the index of the lowest node.
+// If nodes were not found, return -1.
+int LookupPathNodes()
+{
+    int maxEdicts = GetMaxEntities();
+    int lowestNode = maxEdicts + 1;
+    decl String:entName[11]; // strlen("path_track") + 1
+    for (int i = 1; i <= maxEdicts; i++) {
+        if (!IsValidEntity(i)) {
+            continue;
+        }
+        if (!GetEntityClassname(i, entName, sizeof(entName))) {
+            continue;
+        }
+        if (!StrEqual(entName, "path_track")) {
+            continue;
+        }
+        if (GetEntPropString(i, Prop_Data, "m_iName",
+            entName, sizeof(entName)) < 1)
+        {
+            //PrintDebug(_, "Couldn't get path node name %s", entName);
+            continue;
+        }
+        if (!StrContains(entName, g_sPayloadPathNode)) {
+            /*PrintDebug(_, "%s does not contain %s",
+                entName, g_sPayloadPathNode);*/
+            continue;
+        }
+        const int charPos = sizeof(g_sPayloadPathNode) - 1;
+        if (!IsCharNumeric(entName[charPos])) {
+            /*PrintDebug(_, "Path was not numeric at pos %i of %s: %s",
+                charPos, entName, entName[charPos]);*/
+            continue;
+        }
+        /*PrintDebug(_, "Attempting to convert from %s char '%s'",
+            entName, entName[charPos]);*/
+        int index = StringToInt(entName[charPos]);
+        if (g_iPathNodes[index] != 0) {
+            ThrowError("Node already exists for index %i", index);
+        }
+        g_iPathNodes[index] = i;
+        if (index < lowestNode) {
+            lowestNode = index;
+        }
+        //PrintDebug(_, "Set path no. %i to node entity %i", index, i);
+    }
+    return lowestNode > maxEdicts ? -1 : lowestNode;
+}
+
+void ClearPathNodes()
+{
+    for (int i = 0; i < sizeof(g_iPathNodes); i++) {
+        g_iPathNodes[i] = 0;
+    }
 }
 
 // Create a networked entity, and hook it for receiving events.
@@ -112,13 +185,44 @@ static void CreateEntHooks()
             //PrintDebug("Hooked %s to %s", g_iCoordinatorEnt[i], entOutFunc);
         }
     }
+    HookEntityOutput("path_track", "OnPass", OnPass);
+}
+
+int GetNumPathNodes()
+{
+    if (iStartNode == -1) {
+        return 0;
+    }
+    int numNodes = 0;
+    for (int i = iStartNode; g_iPathNodes[i] != 0; i++) {
+        numNodes++;
+    }
+    return numNodes;
+}
+
+public void OnPass(const char[] output, int caller, int activator, float delay)
+{
+    int numNodes = GetNumPathNodes();
+    if (numNodes != 0) {
+        // Iterate through the nodes, starting from second node
+        // because we don't want to AnnounceNodePass for the
+        // first node that happens right on new round start.
+        for (int i = iStartNode + 1; i < numNodes; i++) {
+            if (caller != g_iPathNodes[i]) {
+                continue;
+            }
+            // Add one because AnnounceNodePass starts
+            // node count from 1, not zero.
+            AnnounceNodePass(i - iStartNode + 1, numNodes);
+        }
+    }
 }
 
 static void ClearPayloadCoordinators()
 {
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         if (g_iCoordinatorEnt[i] == 0) {
-            PrintDebug(_, "Coord %i was already 0", i);
+            //PrintDebug(_, "Coord %i was already 0", i);
             continue;
         }
         if (IsValidEntity(g_iCoordinatorEnt[i])) {
@@ -171,6 +275,9 @@ static void ClearEntHooks()
             UnhookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
                 entOutFunc);
         }
+    }
+    if (!UnhookEntityOutput("path_track", "OnPass", OnPass)) {
+        PrintDebug(_, "No OnPass hook was found to unhook");
     }
 }
 
