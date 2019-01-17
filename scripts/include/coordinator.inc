@@ -96,7 +96,7 @@ void EndPayload() {
 int LookupMetaNodeVersion()
 {
     int maxEdicts = GetMaxEntities();
-    decl String:entName[29]; // 29 == strlen("info_teleport_destination") + 4
+    decl String:entName[26]; // strlen("info_teleport_destination") + 1
     int version = -1;
     for (int i = 1; i <= maxEdicts; i++) {
         if (!IsValidEntity(i)) {
