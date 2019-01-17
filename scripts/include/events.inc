@@ -5,18 +5,6 @@
 
 public void OnPluginStart()
 {
-// Sanity check for outputs; cannot have more than we define.
-#if sizeof(g_sCoordinatorOutputs) > MAX_COORDINATOR_INPUTS
-#error "Too many coordinator outputs."
-#endif
-
-    g_dpCoordFuncs = new DataPack();
-    g_dpCoordFuncs.Reset();
-    // NOTE: These *have* to be in the COORDINATOR_... enum order,
-    // and must include a EntityOutput pointer for each coordinator function!
-    g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TeamControl));
-    g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TimeControl));
-
     float minRoundTime, maxRoundTime;
     ConVar neoRoundTime = FindConVar("neo_round_timelimit");
     if (!neoRoundTime) {
@@ -62,15 +50,23 @@ If 1, ignore the check and consider all maps as payload maps. Debug command.",
 
 public void OnConfigsExecuted()
 {
-    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-    neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
-    delete neoRoundTime;
-}
-
-public void OnMapStart()
-{
+    // We are not in a payload map. Bail out!
     if (!g_cDebugAllMapsArePlMaps.BoolValue && !IsPayloadMap()) {
         UnloadSelf();
+    }
+    else {
+        if (g_dpCoordFuncs == null) {
+            g_dpCoordFuncs = new DataPack();
+            g_dpCoordFuncs.Reset();
+            // NOTE: These *have* to be in the COORDINATOR_... enum order,
+            // and must include a EntityOutput pointer for each coordinator function!
+            g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TeamControl));
+            g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TimeControl));
+        }
+        
+        ConVar neoRoundTime = FindConVar("neo_round_timelimit");
+        neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
+        delete neoRoundTime;
     }
 }
 

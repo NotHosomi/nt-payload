@@ -44,6 +44,10 @@ new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
         // TimeControl: No operation.
         "OnUser4"
 };
+// Sanity check for outputs; cannot have more than we define.
+#if sizeof(g_sCoordinatorOutputs) > MAX_COORDINATOR_INPUTS
+#error "Too many coordinator outputs."
+#endif
 // Target names that the logic_relays should fire into to communicate with this plugin.
 // These entities should not exist in the map, as they are created at runtime by this plugin!
 new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
