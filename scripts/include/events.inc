@@ -71,6 +71,8 @@ public void OnConfigsExecuted()
 }
 
 // Clear the coordinators' output hooks before it gets destroyed.
+// We don't need to do this for OnPluginEnd because it is guaranteed
+// to release all hooks automatically.
 public void OnMapEnd()
 {
     EndPayload();
