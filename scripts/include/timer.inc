@@ -159,7 +159,12 @@ public Action Timer_Overtime(Handle timer)
             secsSinceAnnounce++ >= announceInterval)
         {
             PayloadMessage("Overtime!");
-            secsSinceAnnounce = 0;
+            if (secsSinceAnnounce == 0) {
+                secsSinceAnnounce++;
+            }
+            else {
+                secsSinceAnnounce = 0;
+            }
         }
         GameRules_SetPropFloat("m_fRoundTimeLeft", 818.0);
         return Plugin_Continue;
