@@ -22,12 +22,15 @@ enum {
 new const String:payload_id[] = "pl";
 
 ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
-    g_cDebugLvl = null, g_cDebugAllMapsArePlMaps = null;
+    g_cDebugLvl = null, g_cDebugAllMapsArePlMaps = null,
+    g_cNodePassAnnounceFreq = null;
 
 Handle g_hDeadline = null, g_hDeadlineCountdown = null;
 
 // Once the deadline ends, count down from this value to defender victory.
 const int countdownSecs = 10;
+
+static int iLastNodeAnnounce = 0;
 
 // Format and print Payload announcements with the plugin tag included.
 void PayloadMessage(const char[] message, any ...)
@@ -89,7 +92,12 @@ void AnnounceNodePass(int nodePos, int numNodesTotal)
         ThrowError("Got node pos higher than nodes total");
     }
     int percentComplete = RoundToNearest(100.0 * nodePos / numNodesTotal);
-    PayloadMessage("Attacker progress: %i\%", percentComplete);
+    // How many percent since the last announce?
+    // If >= announce frequency, we're allowed to announce again.
+    if (percentComplete - iLastNodeAnnounce >= g_cNodePassAnnounceFreq.IntValue) {
+        PayloadMessage("Attacker progress: %i\%", percentComplete);
+        iLastNodeAnnounce = percentComplete;
+    }
 }
 
 void IncrementDeadline()

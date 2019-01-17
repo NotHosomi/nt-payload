@@ -41,6 +41,12 @@ If 1, ignore the check and consider all maps as payload maps. Debug command.",
     g_cDebugAllMapsArePlMaps = CreateConVar("sm_neopayload_all_maps_are_payload_maps",
         "0", mapCheckDesc, FCVAR_NOTIFY, true, 0.0, true, 1.0);
     
+    g_cNodePassAnnounceFreq = CreateConVar("sm_neopayload_node_pass_announce_frequency",
+        "15", "How much payload push progress, in percentages of 100, must be accumulated \
+before announcing another path node pass event. Setting this to 100 will never \
+announce node passing. Setting this to 0 will announce every node pass.",
+        FCVAR_NOTIFY, true, 0.0, true, 100.0);
+    
     AutoExecConfig(true);
     
     HookConVarChange(g_cRoundTime, CvarChanged_PayloadRoundTime);
