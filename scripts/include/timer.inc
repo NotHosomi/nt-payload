@@ -43,7 +43,7 @@ void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs
     }
     // Timers aren't exactly precise, so give a grace time of a few seconds
     // before actual round end for triggering the defender victory.
-    const float timerInaccuracy = 3.0;
+    const float timerInaccuracy = 5.0;
     // User provided their own round time remaining to use.
     if (wantCustomTime) {
         // Need at least this much time to fit the countdown timer in round.
