@@ -97,23 +97,17 @@ public Action Timer_DelayedSetRespawn(Handle timer)
 // Deadline for delivering the Payload has passed; defenders win.
 public Action Timer_Deadline(Handle timer)
 {
-    /*  TODO: Because the defender win has to happen few seconds before
-        time runs out (because there aren't suitable events for it),
-        there should be a visual countdown for the defender victory,
-        so players get a sense of exactly how many seconds remain. */
     if (g_hDeadlineCountdown != null) {
         LogError("%s g_hDeadlineCountdown was not null!", g_sPluginTag);
         delete g_hDeadlineCountdown;
         g_hDeadlineCountdown = null;
     }
-    
     g_hDeadlineCountdown = CreateTimer(1.0, Timer_DeadlineCountdown, _,
         TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
     _dirtyDeadlineTimer = true;
     if (g_hDeadlineCountdown == null) {
         LogError("%s Failed to create timer g_hDeadlineCountdown", g_sPluginTag);
     }
-    
     g_hDeadline = null;
     return Plugin_Stop;
 }
