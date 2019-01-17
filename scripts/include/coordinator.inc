@@ -67,7 +67,7 @@ new const String:g_sPayloadPathNode[] = "pl_path_";
 // name set to "meta_version_1". Currently this does nothing,
 // but is meant for possible future backwards compatibility,
 // if the coordinator design ever changes.
-new const String:g_sPayloadMetaNodeName[] = "meta_version_";
+new const String:g_sPayloadMetaNodeName[] = "pl_meta_version_";
 
 int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
