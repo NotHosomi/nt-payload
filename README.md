@@ -38,10 +38,20 @@
        where N is a whole number and all the nodes follow it incrementally,
        ie. <i>pl_path_1, pl_path_2, ...</i>
  
- * End the game when the logic_relay AttackerWin is triggered
+ * End the game when the logic_relay AttackerWin is triggered.
      * this is done with <i>FireUser1</i> (Jinrai), or <i>FireUser2</i> (NSF) to set attacker at round begin...
      * ...followed by <i>FireUser3</i> when the attacker deliver the payload to trigger the victory
      * these inputs are fired to <i>"pl_coord_team_control"</i> coordinator
+ 
+ * Enter overtime when round time ends but attackers are still within the payload area.
+     * when at least 1 attacker enters the payload push area, send a <i>FireUser3</i> to
+       <i>pl_coord_time_control</i> coordinator. this tells the plugin that attackers
+       are qualified to an overtime if the time runs out.
+     * when all attackers have left the payload push area, send a <i>FireUser2</i> to
+       <i>pl_coord_time_control</i> coordinator. this tells the plugins that attackers
+       are no longer qualified to an overtime if the time runs out.
+     * map needn't worry about the overtime logic, this is handled plugin side.
+       these inputs can be safely fired even if it isn't overtime yet.
 
  Some additional features that would be a bonus would be things like a modified HUD, but I don't know if a plugin can do that.
  Alternatively we just use a text entity to say the current status of the cart at the bottom of the screen.
