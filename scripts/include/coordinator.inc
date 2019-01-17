@@ -60,21 +60,59 @@ DataPack g_dpCoordFuncs = null;
 
 void StartPayload() {
     CreatePayloadCoordinators();
+    CreateEntHooks();
     CreateDeadlineTimer();
 }
 
 void EndPayload() {
-    // Clear the timers.
-    if (g_hDeadline != null) {
-        delete g_hDeadline;
-        g_hDeadline = null;
+    ClearTimers();
+    ClearEntHooks();
+    ClearPayloadCoordinators();
+}
+
+// Create a networked entity, and hook it for receiving events.
+// TODO // is the old coordinator deleted on round end? -H
+static void CreatePayloadCoordinators()
+{
+    // Debug check, TODO: remove this
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        if (g_iCoordinatorEnt[i] > 0) {
+            PrintDebug(_, "CreatePayloadCoordinator: \
+Called while g_iCoordinatorEnt[%i] > 0", i);
+        }
     }
-    if (g_hDeadlineCountdown != null) {
-        delete g_hDeadlineCountdown;
-        g_hDeadlineCountdown = null;
+    g_dpCoordFuncs.Reset();
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        PrintDebug(_, "Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
+        g_iCoordinatorEnt[i] = CreateEntityByName(g_sCoordinatorClassName);
+        if (g_iCoordinatorEnt[i] == -1) {
+            SetFailState("Coordinator creation failed");
+        }
+        // Name the entity, so that Payload map logic can target fire events to it.
+        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname", g_sCoordinatorTargetname[i])) {
+            SetFailState("Failed to dispatch targetname kv for coordinator");
+        }
+        if (!DispatchSpawn(g_iCoordinatorEnt[i])) {
+            SetFailState("Failed to dispatch spawn for coordinator");
+        }
     }
-    // Coordinators are cleared on newround.
-    // Still doing the check here in case we got unloaded unexpectedly.
+}
+
+static void CreateEntHooks()
+{
+    // Hook the coordinator output.
+    EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
+            HookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
+                    entOutFunc, false);
+            //PrintDebug("Hooked %s to %s", g_iCoordinatorEnt[i], entOutFunc);
+        }
+    }
+}
+
+static void ClearPayloadCoordinators()
+{
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         if (g_iCoordinatorEnt[i] == 0) {
             PrintDebug(_, "Coord %i was already 0", i);
@@ -103,46 +141,6 @@ void EndPayload() {
         }
         g_iCoordinatorEnt[i] = 0;
     }
-
-    ClearEntHooks();
-}
-
-// Create a networked entity, and hook it for receiving events.
-// TODO // is the old coordinator deleted on round end? -H
-static void CreatePayloadCoordinators()
-{
-    // Debug check, TODO: remove this
-    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        if (g_iCoordinatorEnt[i] > 0) {
-            PrintDebug(_, "CreatePayloadCoordinator: \
-Called while g_iCoordinatorEnt[%i] > 0", i);
-        }
-    }
-    
-    ClearEntHooks();
-    
-    g_dpCoordFuncs.Reset();
-    for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        PrintDebug(_, "Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
-        g_iCoordinatorEnt[i] = CreateEntityByName(g_sCoordinatorClassName);
-        if (g_iCoordinatorEnt[i] == -1) {
-            SetFailState("Coordinator creation failed");
-        }
-        // Name the entity, so that Payload map logic can target fire events to it.
-        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname", g_sCoordinatorTargetname[i])) {
-            SetFailState("Failed to dispatch targetname kv for coordinator");
-        }
-        if (!DispatchSpawn(g_iCoordinatorEnt[i])) {
-            SetFailState("Failed to dispatch spawn for coordinator");
-        }
-        // Hook the coordinator output.
-        EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
-        for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
-            HookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
-                    entOutFunc, false);
-            //PrintDebug("Hooked %s to %s", g_iCoordinatorEnt[i], entOutFunc);
-        }
-    }
 }
 
 // Convert the received output string into coordinator int enum value.
@@ -162,7 +160,7 @@ static void ClearEntHooks()
 {        
     g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        if (!g_iCoordinatorEnt[i] || !IsValidEntity(g_iCoordinatorEnt[i])) {
+        if (g_iCoordinatorEnt[i] == 0 || !IsValidEntity(g_iCoordinatorEnt[i])) {
             continue;
         }
         EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
@@ -170,7 +168,6 @@ static void ClearEntHooks()
             UnhookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
                 entOutFunc);
         }
-        g_iCoordinatorEnt[i] = 0;
     }
 }
 
