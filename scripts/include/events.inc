@@ -43,6 +43,12 @@ a checkpoint, in seconds.", FCVAR_NOTIFY, true, 0.0, true, maxRoundTime);
 debug to server log and display in client console. 2 = same as 1, but also \
 print debug to client chat. 3 = same as 2, but also print debug to server \
 output.", FCVAR_NOTIFY, true, 0.0, true, 3.0);
+
+    g_cDebugAllMapsArePlMaps = CreateConVar("sm_neopayload_all_maps_are_payload_maps", "0",
+        "If 0, only maps following the pattern mapname_pl(...) are considered \
+payload maps, and this plugin will auto-unload when changing to a non-pl map. \
+If 1, ignore the check and consider all maps as payload maps. Debug command.",
+        FCVAR_NOTIFY, true, 0.0, true, 1.0);
     
     AutoExecConfig(true);
     
@@ -58,14 +64,12 @@ public void OnConfigsExecuted()
     delete neoRoundTime;
 }
 
-#if !defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
 public void OnMapStart()
 {
-    if (!IsPayloadMap()) {
+    if (!g_cDebugAllMapsArePlMaps.BoolValue && !IsPayloadMap()) {
         UnloadSelf();
     }
 }
-#endif
 
 // Clear the coordinators' output hooks before it gets destroyed.
 public void OnMapEnd()

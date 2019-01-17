@@ -18,7 +18,7 @@ enum {
 };
 
 ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
-    g_cDebugLvl = null;
+    g_cDebugLvl = null, g_cDebugAllMapsArePlMaps = null;
 
 Handle g_hDeadline = null, g_hDeadlineCountdown = null;
 
@@ -172,7 +172,6 @@ void SetRespawning(bool respawnEnabled)
     GameRules_SetProp("m_iGameState", gamestate);
 }
 
-#if !defined DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS
 // Unload this plugin.
 void UnloadSelf()
 {
@@ -200,4 +199,3 @@ bool IsPayloadMap()
     }
     return StrEqual(buffers[2], payload_id);
 }
-#endif
