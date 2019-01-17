@@ -36,7 +36,7 @@ public void OnPluginStart()
     
     g_cDeadlineExtendTime = CreateConVar("sm_neopayload_deadline_extend_time", "30",
         "How much to extend payload deadline upon attackers reaching \
-a checkpoint, in seconds.", FCVAR_NOTIFY, true, 0.0, true, maxRoundTime);
+a checkpoint, in seconds.", FCVAR_NOTIFY, true, 0.0, true, maxRoundTime * 60);
 
     g_cDebugLvl = CreateConVar("sm_neopayload_debug", "1",
         "Payload debug verbosity level. 0 = no debug, 1 = basic debug; store \
