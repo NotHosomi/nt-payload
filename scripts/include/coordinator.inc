@@ -112,12 +112,12 @@ int LookupMetaNodeVersion()
         if (GetEntPropString(i, Prop_Data, "m_iName",
             entName, sizeof(entName)) < 1)
         {
-            PrintDebug(_, "Couldn't get path node name %s", entName);
+            //PrintDebug(_, "Couldn't get path node name %s", entName);
             continue;
         }
         if (!StrContains(g_sPayloadMetaNodeName, entName)) {
-            PrintDebug(_, "%s does not contain %s",
-                entName, g_sPayloadMetaNodeName);
+            /*PrintDebug(_, "%s does not contain %s",
+                entName, g_sPayloadMetaNodeName);*/
             continue;
         }
         const int charPos = sizeof(g_sPayloadMetaNodeName) - 1;
