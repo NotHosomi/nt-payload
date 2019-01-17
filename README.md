@@ -7,7 +7,8 @@
  
 
 ### MAPMAKERS MUST
-  make sure spawnrooms are inaccessible to the opposing team when active.
+  * make sure spawnrooms are inaccessible to the opposing team when active.
+  * abide by the <a href="#plugin-interactions">Plugin Interactions</a> rules.
   
 
 
@@ -29,6 +30,11 @@
 
 ### PLUGIN INTERACTIONS
  The plugin is required to do a few things when recieveing a set of outputs from the map
+ * Keep track of which plugin version the map was built for.
+     * payload maps must include one unused <i>info_teleport_destination</i>, with the name
+       <i>meta_version_1</i>. this is currently unused, but ensures backwards compatibility
+       without breaking existing maps, should the plugin design ever change in the future.
+ 
  * Add time when each capturepoint logic_relay is triggered.
      * this is done with a <i>FireUser1</i> call to <i>"pl_coord_time_control"</i> coordinator
  
