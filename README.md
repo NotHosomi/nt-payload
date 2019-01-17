@@ -29,7 +29,8 @@
 
 
 ### PLUGIN INTERACTIONS
- The plugin is required to do a few things when recieveing a set of outputs from the map
+ The plugin is required to do a few things when receiveing a set of outputs from the map
+ 
  * Keep track of which plugin version the map was built for.
      * payload maps must include one unused <i>info_teleport_destination</i>, with the name
        <i>pl_meta_version_1</i>. this is currently unused, but ensures backwards compatibility
@@ -48,6 +49,7 @@
      * this is done with <i>FireUser1</i> (Jinrai), or <i>FireUser2</i> (NSF) to set attacker at round begin...
      * ...followed by <i>FireUser3</i> when the attacker deliver the payload to trigger the victory
      * these inputs are fired to <i>"pl_coord_team_control"</i> coordinator
+     * the "set attacker" trigger should fire only once, to avoid chat spamming about who is attacking
  
  * Enter overtime when round time ends but attackers are still within the payload area.
      * when at least 1 attacker enters the payload push area, send a <i>FireUser3</i> to
