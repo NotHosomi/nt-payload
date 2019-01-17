@@ -69,6 +69,21 @@ public void OnConfigsExecuted()
     if (!g_cDebugAllMapsArePlMaps.BoolValue && !IsPayloadMap()) {
         UnloadSelf();
     }
+    else {
+        int version = LookupMetaNodeVersion();
+        PrintDebug(_, "Got meta version: %i", version);
+        if (version == 0) {
+            PrintDebug(_, "No valid payload meta version node found in \
+map, unloading plugin.");
+            UnloadSelf();
+        }
+        else if (version != 1) {
+            PrintDebug(_, "Unsupported payload meta version %i found in \
+map, unloading plugin.", version);
+            UnloadSelf();
+        }
+    }
+
     ConVar neoRoundTime = FindConVar("neo_round_timelimit");
     neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
     delete neoRoundTime;

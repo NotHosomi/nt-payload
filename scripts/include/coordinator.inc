@@ -62,6 +62,12 @@ new const String:g_sCoordinatorClassName[] = "info_teleport_destination";
 // Node link is allowed to start from any unsigned 32 bit integer,
 // albeit 1 and 0 are probably the most understandable choices.
 new const String:g_sPayloadPathNode[] = "pl_path_";
+// Metadata about the payload version a map was built for.
+// Payload map must have a info_teleport_destination with its
+// name set to "meta_version_1". Currently this does nothing,
+// but is meant for possible future backwards compatibility,
+// if the coordinator design ever changes.
+new const String:g_sPayloadMetaNodeName[] = "meta_version_";
 
 int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
@@ -87,6 +93,40 @@ void EndPayload() {
     ClearPathNodes();
 }
 
+int LookupMetaNodeVersion()
+{
+    int maxEdicts = GetMaxEntities();
+    decl String:entName[29]; // 29 == strlen("info_teleport_destination") + 4
+    int version = -1;
+    for (int i = 1; i <= maxEdicts; i++) {
+        if (!IsValidEntity(i)) {
+            continue;
+        }
+        if (!GetEntityClassname(i, entName, sizeof(entName))) {
+            continue;
+        }
+        if (!StrEqual(entName, "info_teleport_destination")) {
+            //PrintDebug(_, "no dice: %s", entName);
+            continue;
+        }
+        if (GetEntPropString(i, Prop_Data, "m_iName",
+            entName, sizeof(entName)) < 1)
+        {
+            PrintDebug(_, "Couldn't get path node name %s", entName);
+            continue;
+        }
+        if (!StrContains(g_sPayloadMetaNodeName, entName)) {
+            PrintDebug(_, "%s does not contain %s",
+                entName, g_sPayloadMetaNodeName);
+            continue;
+        }
+        const int charPos = sizeof(g_sPayloadMetaNodeName) - 1;
+        version = StringToInt(entName[charPos]);
+        break;
+    }
+    return version;
+}
+
 // TODO: run only once per map to avoid expensive string operations
 // Iterate map edicts, and find all path_track nodes
 // following the payload naming scheme.
@@ -96,7 +136,7 @@ int LookupPathNodes()
 {
     int maxEdicts = GetMaxEntities();
     int lowestNode = maxEdicts + 1;
-    decl String:entName[11]; // strlen("path_track") + 1
+    decl String:entName[11]; // strlen("path_track") + 1 TODO: this len allows only 100 nodes max, increase to 1000 range?
     for (int i = 1; i <= maxEdicts; i++) {
         if (!IsValidEntity(i)) {
             continue;
