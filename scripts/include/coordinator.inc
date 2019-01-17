@@ -64,7 +64,7 @@ new const String:g_sCoordinatorClassName[] = "info_teleport_destination";
 new const String:g_sPayloadPathNode[] = "pl_path_";
 // Metadata about the payload version a map was built for.
 // Payload map must have a info_teleport_destination with its
-// name set to "meta_version_1". Currently this does nothing,
+// name set to "pl_meta_version_1". Currently this does nothing,
 // but is meant for possible future backwards compatibility,
 // if the coordinator design ever changes.
 new const String:g_sPayloadMetaNodeName[] = "pl_meta_version_";
