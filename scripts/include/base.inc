@@ -17,6 +17,10 @@ enum {
     DEBUGLVL_DEV
 };
 
+// Payload maps are identified by the naming convention nt_mapname_gamemode,
+// where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
+new const String:payload_id[] = "pl";
+
 ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
     g_cDebugLvl = null, g_cDebugAllMapsArePlMaps = null;
 
@@ -184,10 +188,6 @@ void UnloadSelf()
 // Return whether the current map is a Payload map.
 bool IsPayloadMap()
 {
-    // Payload maps are identified by the naming convention nt_mapname_gamemode,
-    // where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
-    new const String:payload_id[] = "pl";
-
     decl String:mapName[128];
     GetCurrentMap(mapName, sizeof(mapName));
     
