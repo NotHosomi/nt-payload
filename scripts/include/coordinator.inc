@@ -21,9 +21,8 @@ enum {
 
 enum {
     TIMECONTROL_INCREMENT = 0,
-    TIMECONTROL_ENABLE_OVERTIME,
-    TIMECONTROL_DISABLE_OVERTIME,
-    TIMECONTROL_ANNOUNCE_PROGRESS,
+    TIMECONTROL_OVERTIME_DISQUALIFY,
+    TIMECONTROL_OVERTIME_QUALIFY,
     TIMECONTROL_ENUM_COUNT
 };
 
@@ -36,10 +35,10 @@ new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
         // TimeControl: Increment deadline.
         "OnUser1",
         // TeamControl: Set the attacker as NSF.
-        // TimeControl: No operation.
+        // TimeControl: All attackers have exited the cart's push area. If overtime, this will end it.
         "OnUser2",
         // TeamControl: Signal that the attacker has won the round.
-        // TimeControl: No operation.
+        // TimeControl: At least one attacker has entered the cart's push area. This allows for overtime.
         "OnUser3",
         // TeamControl: No operation.
         // TimeControl: No operation.
@@ -157,7 +156,6 @@ static void CreatePayloadCoordinators()
 Called while g_iCoordinatorEnt[%i] > 0", i);
         }
     }
-    g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         PrintDebug(_, "Preparing to dispatch %s", g_sCoordinatorTargetname[i]);
         g_iCoordinatorEnt[i] = CreateEntityByName(g_sCoordinatorClassName);
@@ -177,8 +175,9 @@ Called while g_iCoordinatorEnt[%i] > 0", i);
 static void CreateEntHooks()
 {
     // Hook the coordinator output.
-    EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+    g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+        EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
         for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
             HookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
                     entOutFunc, false);
@@ -311,9 +310,18 @@ public void TimeControl(const char[] output, int caller,
         ThrowError("GetCoordEnum failed on output: %s", output);
     }
     else if (cmdEnum == TIMECONTROL_INCREMENT) {
-        IncrementDeadline();
-        PayloadMessage(
-            "Attackers have gained %i more seconds by reaching a checkpoint!",
-            g_cDeadlineExtendTime.IntValue);
+        // Only award extra time if not in overtime.
+        if (g_hOvertimePoll == null) {
+            IncrementDeadline();
+            PayloadMessage(
+                "Attackers have gained %i more seconds by reaching a checkpoint!",
+                g_cDeadlineExtendTime.IntValue);
+        }
+    }
+    else if (cmdEnum == TIMECONTROL_OVERTIME_DISQUALIFY) {
+        SetIsQualifiedForOvertime(false);
+    }
+    else if (cmdEnum == TIMECONTROL_OVERTIME_QUALIFY) {
+        SetIsQualifiedForOvertime(true);
     }
 }

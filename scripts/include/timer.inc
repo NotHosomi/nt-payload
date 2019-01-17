@@ -3,8 +3,8 @@
 #endif
 #define _timer_
 
-// Bool flag to detect if we got interrupted by time extension.
-static bool _dirtyDeadlineTimer = false;
+// Bool flag to detect if we got interrupted.
+static bool _dirtyDeadlineTimer = false, _dirtyOvertimeTimer = false;
 
 // Delete any existing deadline timers, and create a new one.
 // If no arguments are provided, assume a timer expiring at the end
@@ -22,13 +22,24 @@ void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs
             delete g_hDeadlineCountdown;
             g_hDeadlineCountdown = null;
         }
+        if (g_hOvertimePoll != null) {
+            LogError("%s Both deadline and overtime timers were active at the same time!",
+                g_sPluginTag);
+            delete g_hOvertimePoll;
+            g_hOvertimePoll = null;
+        }
         delete g_hDeadline;
         g_hDeadline = null;
     }
     // Kill the end of round countdown timer, if it exists.
-    else if (g_hDeadlineCountdown != null) {
+    if (g_hDeadlineCountdown != null) {
         delete g_hDeadlineCountdown;
         g_hDeadlineCountdown = null;
+    }
+    // Kill the overtime timer, if it exists.
+    if (g_hOvertimePoll != null) {
+        delete g_hOvertimePoll;
+        g_hOvertimePoll = null;
     }
     // Timers aren't exactly precise, so give a grace time of a few seconds
     // before actual round end for triggering the defender victory.
@@ -70,6 +81,10 @@ void ClearTimers()
     if (g_hDeadlineCountdown != null) {
         delete g_hDeadlineCountdown;
         g_hDeadlineCountdown = null;
+    }
+    if (g_hOvertimePoll != null) {
+        delete g_hOvertimePoll;
+        g_hOvertimePoll = null;
     }
 }
 
@@ -116,9 +131,39 @@ public Action Timer_DeadlineCountdown(Handle timer)
         g_hDeadlineCountdown = null;
         countdown = countdownSecs;
         _dirtyDeadlineTimer = false;
-        DeclareVictory(GetDefendingTeam());
+        if (g_hOvertimePoll != null) {
+            LogError("%s Both countdown and overtime timers were active at the same time!",
+                g_sPluginTag);
+            delete g_hOvertimePoll;
+            g_hOvertimePoll = null;
+        }
+        g_hOvertimePoll = CreateTimer(1.0, Timer_Overtime, _,
+            TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
+        _dirtyOvertimeTimer = true;
         return Plugin_Stop;
     }
     PayloadMessage("Time remaining: %i", countdown--);
     return Plugin_Continue;
+}
+
+public Action Timer_Overtime(Handle timer)
+{
+    static int secsSinceAnnounce = 0;
+    const int announceInterval = 30;
+    if (_dirtyOvertimeTimer) {
+        secsSinceAnnounce = 0;
+        _dirtyOvertimeTimer = false;
+    }
+    if (GetIsQualifiedForOvertime()) {
+        if (secsSinceAnnounce++ >= announceInterval) {
+            PayloadMessage("Overtime!");
+            secsSinceAnnounce = 0;
+        }
+        GameRules_SetPropFloat("m_fRoundTimeLeft", 818.0);
+        return Plugin_Continue;
+    }
+    secsSinceAnnounce = 0;
+    g_hOvertimePoll = null;
+    DeclareVictory(GetDefendingTeam());
+    return Plugin_Stop;
 }

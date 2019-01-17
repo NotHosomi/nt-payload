@@ -25,12 +25,26 @@ ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
     g_cDebugLvl = null, g_cDebugAllMapsArePlMaps = null,
     g_cNodePassAnnounceFreq = null;
 
-Handle g_hDeadline = null, g_hDeadlineCountdown = null;
+Handle g_hDeadline = null, g_hDeadlineCountdown = null,
+    g_hOvertimePoll = null;
 
 // Once the deadline ends, count down from this value to defender victory.
 const int countdownSecs = 10;
 
 static int iLastNodeAnnounce = 0;
+
+static bool bIsQualifiedForOvertime = false;
+
+void SetIsQualifiedForOvertime(bool qualifiedForOt)
+{
+    PrintDebug(_, "SetIsQualifiedForOvertime %i", qualifiedForOt);
+    bIsQualifiedForOvertime = qualifiedForOt;
+}
+
+bool GetIsQualifiedForOvertime()
+{
+    return bIsQualifiedForOvertime;
+}
 
 // Format and print Payload announcements with the plugin tag included.
 void PayloadMessage(const char[] message, any ...)

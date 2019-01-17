@@ -52,6 +52,15 @@ announce node passing. Setting this to 0 will announce every node pass.",
     HookConVarChange(g_cRoundTime, CvarChanged_PayloadRoundTime);
     
     HookEvent("game_round_start", Event_RoundStart);
+
+    if (g_dpCoordFuncs == null) {
+        g_dpCoordFuncs = new DataPack();
+        g_dpCoordFuncs.Reset();
+        // NOTE: These *have* to be in the COORDINATOR_... enum order,
+        // and must include a EntityOutput pointer for each coordinator function!
+        g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TeamControl));
+        g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TimeControl));
+    }
 }
 
 public void OnConfigsExecuted()
@@ -60,20 +69,9 @@ public void OnConfigsExecuted()
     if (!g_cDebugAllMapsArePlMaps.BoolValue && !IsPayloadMap()) {
         UnloadSelf();
     }
-    else {
-        if (g_dpCoordFuncs == null) {
-            g_dpCoordFuncs = new DataPack();
-            g_dpCoordFuncs.Reset();
-            // NOTE: These *have* to be in the COORDINATOR_... enum order,
-            // and must include a EntityOutput pointer for each coordinator function!
-            g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TeamControl));
-            g_dpCoordFuncs.WriteFunction(view_as<EntityOutput>(TimeControl));
-        }
-        
-        ConVar neoRoundTime = FindConVar("neo_round_timelimit");
-        neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
-        delete neoRoundTime;
-    }
+    ConVar neoRoundTime = FindConVar("neo_round_timelimit");
+    neoRoundTime.SetFloat(g_cRoundTime.FloatValue, true, false);
+    delete neoRoundTime;
 }
 
 // Clear the coordinators' output hooks before it gets destroyed.
