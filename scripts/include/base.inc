@@ -3,169 +3,150 @@
 #endif
 #define _base_
 
-
-#pragma semicolon 1
-
-#include <sourcemod>
-#include <sdktools>
-#include <neotokyo>
-
-#define PLUGIN_VERSION "0.2"
-#define DEBUG_PRINT_MORE_DETAILS
-
-
-enum {
-    COORD_ATTACKER_IS_JINRAI = 0,
-    COORD_ATTACKER_IS_NSF,
-    COORD_ATTACKER_HAS_WON,
-    COORD_ADD_TIME,
-    COORD_ENUM_COUNT
-};
-
-// Target name that the logic_relays should fire into to communicate with this plugin.
-// This entity should not exist in the map, as it is created at runtime by this plugin!
-new const String:g_sCoordinatorName[] = "payload_coordinator";
-
-// Payload maps are identified by the naming convention nt_mapname_gamemode,
-// where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
-new const String:g_sPayloadMapIdentifier[] = "pl";
-//#define DEBUG_ALL_MAPS_ARE_PAYLOAD_MAPS // Uncomment to disable the map name check.
-
-// Possible inputs to fire into the coordinator outputs.
-// OnUserN is triggered by firing the matching "FireUserN" input;
-// e.g. logic_relay --> FireUser3 --> payload_coordinator = trigger attacker victory.
-// Note that the attacker must be set by using FireUser1 or 2 before sending the win signal.
-new const String:g_sCoordinatorOutputs[COORD_ENUM_COUNT][] = {
-        "OnUser1",  // Set the attacker as Jinrai.
-        "OnUser2",  // Set the attacker as NSF.
-        "OnUser3",  // Signal that the attacker has won the round.
-        "OnUser4"   // Add time to timer -H
-};
+#define PLUGIN_VERSION "0.3"
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
     "none", "spectator", "Jinrai", "NSF"
 };
 
-int g_iAttacker = TEAM_NONE;
-int g_iCoordinatorEnt = 0;
+enum {
+    DEBUGLVL_NONE = 0,
+    DEBUGLVL_PUBLIC_TEST,
+    DEBUGLVL_PUBLIC_TEST_VERBOSE,
+    DEBUGLVL_DEV
+};
 
-ConVar g_cRoundTime = null;
-Handle g_hDeadline = null;
+// Payload maps are identified by the naming convention nt_mapname_gamemode,
+// where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
+new const String:payload_id[] = "pl";
 
+ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
+    g_cDebugLvl = null, g_cDebugAllMapsArePlMaps = null,
+    g_cNodePassAnnounceFreq = null;
 
-// Convert the received output string into coordinator int enum value.
-int GetCoordEnum(const char[] output)
+Handle g_hDeadline = null, g_hDeadlineCountdown = null,
+    g_hOvertimePoll = null;
+
+// Once the deadline ends, count down from this value to defender victory.
+const int countdownSecs = 10;
+
+static int iLastNodeAnnounce = 0;
+
+static bool bIsQualifiedForOvertime = false;
+
+void SetIsQualifiedForOvertime(bool qualifiedForOt)
 {
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        if (StrEqual(g_sCoordinatorOutputs[i], output)) {
-            return i;
-        }
-    }
-    return -1;
+    PrintDebug(_, "SetIsQualifiedForOvertime %i", qualifiedForOt);
+    bIsQualifiedForOvertime = qualifiedForOt;
 }
 
-// Create a networked entity, and hook it for receiving events.
-void CreatePayloadCoordinator()
+bool GetIsQualifiedForOvertime()
 {
-    if (g_iCoordinatorEnt > 0) {
-        LogError("%s CreatePayloadCoordinator: Called while g_iCoordinatorEnt > 0",
-                g_sPluginTag);
-        ClearEntHooks();
-    }
-    // This could be any networked entity with a targetname field;
-    // I chose teleport destination because it has no discernible side effects.
-    g_iCoordinatorEnt = CreateEntityByName("info_teleport_destination");
-    if (g_iCoordinatorEnt == -1) {
-        SetFailState("Coordinator creation failed");
-    }
-    // Name the entity, so that Payload map logic can target fire events to it.
-    if (!DispatchKeyValue(g_iCoordinatorEnt, "targetname", g_sCoordinatorName)) {
-        SetFailState("Failed to dispatch targetname for coordinator");
-    }
-    // Hook the coordinator outputs.
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        HookSingleEntityOutput(g_iCoordinatorEnt, g_sCoordinatorOutputs[i],
-                CoordinatePayload, false);
-    }
+    return bIsQualifiedForOvertime;
 }
 
 // Format and print Payload announcements with the plugin tag included.
 void PayloadMessage(const char[] message, any ...)
-{   
-    decl String:prettyMessage[sizeof(g_sPluginTag) + 512];
-    Format(prettyMessage, sizeof(prettyMessage), "%s %s", g_sPluginTag, message);
-    
-    decl String:buffer[sizeof(prettyMessage)];
-    VFormat(buffer, sizeof(buffer), prettyMessage, 2);
-
-    PrintToChatAll(buffer);
-
-#if defined DEBUG_PRINT_MORE_DETAILS
-    PrintToServer(buffer);
-#endif
+{
+    // TODO figure out how to nicely allocate just needed amount
+    int bufLen = strlen(message) + 512;
+    decl String:buffer[bufLen];
+    VFormat(buffer, bufLen, message, 2);
+    PrintToChatAll("%s %s", g_sPluginTag, buffer);
 }
 
-// Remove the entity hooks.
-void ClearEntHooks()
+void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
 {
-    if (!g_iCoordinatorEnt || !IsValidEntity(g_iCoordinatorEnt)) {
+    if (g_cDebugLvl.IntValue == DEBUGLVL_NONE) {
         return;
     }
-    
-    for (int i = 0; i < COORD_ENUM_COUNT; i++) {
-        UnhookSingleEntityOutput(g_iCoordinatorEnt, g_sCoordinatorOutputs[i],
-                CoordinatePayload);
+    // TODO figure out how to nicely allocate just needed amount
+    int bufLen = strlen(msg) + 512;
+    decl String:buffer[bufLen];
+    if (VFormat(buffer, bufLen, msg, 3) < 1) {
+        ThrowError("VFormat failed for %s", msg);
     }
-    g_iCoordinatorEnt = 0;
+    // Only continue if this message is different from the last one.
+    if (onlyOnce) {
+        static char lastMessage[1024];
+        bool wasEqual = StrEqual(buffer, lastMessage);
+        strcopy(lastMessage, sizeof(lastMessage), buffer);
+        if (wasEqual) {
+            return;
+        }
+    }
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_PUBLIC_TEST) {
+        PrintToConsoleAll("[debug] %s", buffer);
+        LogToFile("addons/sourcemod/logs/payload.log", buffer);
+    }
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_PUBLIC_TEST_VERBOSE) {
+        PrintToChatAll("[debug] %s", buffer);
+    }
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_DEV) {
+        PrintToServer("[debug] %s", buffer);
+    }
 }
 
-// Coordinate output events sent to coordinator from the map.
-public void CoordinatePayload(const char[] output, int caller,
-        int activator, float delay)
+// Takes currently passed node position (starting from 1),
+// and the total amount of payload nodes in the map.
+// Announces the percentage of the payload track completed.
+// TODO: calculate node distances to get an accurate reading;
+// currently this naïvely assumes nodes are equal distance
+// away from each other.
+void AnnounceNodePass(int nodePos, int numNodesTotal)
 {
-#if defined DEBUG_PRINT_MORE_DETAILS
-    PayloadMessage("(debug) CoordinatePayload: %s", output);
-#endif
+    if (numNodesTotal < 1) {
+        ThrowError("Got total nodes < 1");
+    }
+    else if (nodePos < 1) {
+        ThrowError("Got node pos < 1");
+    }
+    else if (nodePos > numNodesTotal) {
+        ThrowError("Got node pos higher than nodes total");
+    }
+    int percentComplete = RoundToNearest(100.0 * nodePos / numNodesTotal);
+    // How many percent since the last announce?
+    // If >= announce frequency, we're allowed to announce again.
+    if (percentComplete - iLastNodeAnnounce >= g_cNodePassAnnounceFreq.IntValue) {
+        PayloadMessage("Attacker progress: %i\%", percentComplete);
+        iLastNodeAnnounce = percentComplete;
+    }
+}
 
-    int coordEnum = GetCoordEnum(output);
-    if (coordEnum == -1) {
-        ThrowError("GetCoordEnum failed on output: %s", output);
-    }
-    else if (coordEnum == COORD_ATTACKER_HAS_WON) {
-        DeclareVictory(GetAttackingTeam());
-    }
-    else {
-        int team = CoordEnumToTeamEnum(coordEnum);
-        SetAttackingTeam(team);
-    }
+void IncrementDeadline()
+{
+    // Get round times
+    float roundTimeLeft = GameRules_GetPropFloat("m_fRoundTimeLeft");
+    float newTime = roundTimeLeft + g_cDeadlineExtendTime.IntValue;
+    // Change game internal round timer
+    GameRules_SetPropFloat("m_fRoundTimeLeft", newTime);
+    // Change plugin timer
+    CreateDeadlineTimer(true, newTime);
+    PrintDebug(_, "Called CreateDeadlineTimer with %f time", newTime);
 }
 
 // Cue the confetti.
-void DeclareVictory(int team)
+void DeclareVictory(int winner)
 {
-    // Kill the defenders' deadline timer when victory is declared.
-    if (g_hDeadline != null) {
-        delete g_hDeadline;
-        g_hDeadline = null; // TODO: Does delete null it already?
-    }
+    EndPayload();
 
-    if (team != TEAM_JINRAI && team != TEAM_NSF) {
-        ThrowError("Declared winner with invalid team (%i)", team);
+    if (winner != TEAM_JINRAI && winner != TEAM_NSF) {
+        PayloadMessage("Error with win condition; payload disabled for this round!");
+        ThrowError("Declared winner with invalid team (%i)", winner);
     }
 
     // HACK/TODO: Just kill all losers for now to force round end.
     SetRespawning(false);
-    SoftKillTeam(GetOppositeTeam(team));
+    SoftKillTeam(GetOppositeTeam(winner));
 
-    if (team == GetAttackingTeam()) {
-        PayloadMessage("%s wins by delivering the payload!", g_sTeamNames[team]);
+    if (winner == GetAttackingTeam()) {
+        PayloadMessage("%s wins by delivering the payload!", g_sTeamNames[winner]);
     }
     else {
-        PayloadMessage("%s wins by defending the base!", g_sTeamNames[team]);
+        PayloadMessage("%s wins by defending the base!", g_sTeamNames[winner]);
     }
 }
-
 
 // Toggle respawning with Neotokyo's warmup game state.
 void SetRespawning(bool respawnEnabled)
@@ -193,3 +174,17 @@ void UnloadSelf()
     ServerCommand("sm plugins unload %s", thisPluginFilename);
 }
 
+// Return whether the current map is a Payload map.
+bool IsPayloadMap()
+{
+    decl String:mapName[128];
+    GetCurrentMap(mapName, sizeof(mapName));
+    
+    char buffers[3][100];
+    int splits = ExplodeString(mapName, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+    // Map name does not follow the "nt_mapname_gamemode" pattern.
+    if (splits < 2) {
+        return false;
+    }
+    return StrEqual(buffers[2], payload_id);
+}

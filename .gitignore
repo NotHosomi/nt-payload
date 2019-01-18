@@ -1,4 +1,6 @@
-
+# compile helper scripts etc.
+*.cmd
 *.vmx
-
 *.prt
+# compiled plugin binaries
+*.smx

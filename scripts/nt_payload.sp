@@ -13,10 +13,10 @@
 #include <neotokyo>
 
 #include "include/base.inc"
+#include "include/coordinator.inc"
 #include "include/events.inc"
-
-#define PLUGIN_VERSION "0.2"
-#define DEBUG_PRINT_MORE_DETAILS
+#include "include/teams.inc"
+#include "include/timer.inc"
 
 public Plugin myinfo = {
     name = "NEOTOKYO° Payload",

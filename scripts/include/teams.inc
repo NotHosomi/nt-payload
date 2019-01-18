@@ -3,22 +3,20 @@
 #endif
 #define _teams_
 
-
+static int g_iAttacker = TEAM_NONE;
 
 // Convert the coordinator's attacker enum into a NT team enum.
 int CoordEnumToTeamEnum(int coordEnum)
 {
-    if (coordEnum == COORD_ATTACKER_IS_JINRAI) {
+    if (coordEnum == TEAMCONTROL_ATTACKER_IS_JINRAI) {
         return TEAM_JINRAI;
     }
-    else if (coordEnum == COORD_ATTACKER_IS_NSF) {
+    else if (coordEnum == TEAMCONTROL_ATTACKER_IS_NSF) {
         return TEAM_NSF;
     }
-    else {
-        LogError("%s CoordEnumToTeamEnum: invalid team coord enum (%i)",
-                g_sPluginTag, coordEnum);
-        return TEAM_NONE;
-    }
+    LogError("%s CoordEnumToTeamEnum: invalid team coord enum (%i)",
+        g_sPluginTag, coordEnum);
+    return TEAM_NONE;
 }
 
 // Kill all in team, and then cancel their XP loss and death increment.
@@ -45,6 +43,8 @@ void SetAttackingTeam(int team)
 
     g_iAttacker = team;
 
+    // Map maker has the responsibility to set their
+    // trigger to fire once per round to avoid message spam here.
     PayloadMessage("Attacking team is now %s", g_sTeamNames[team]);
 }
 
@@ -55,7 +55,7 @@ int GetAttackingTeam()
 
 int GetDefendingTeam()
 {
-    return g_iAttacker == TEAM_JINRAI ? TEAM_NSF : TEAM_JINRAI;
+    return GetOppositeTeam(GetAttackingTeam());
 }
 
 int GetOppositeTeam(int team)
