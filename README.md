@@ -44,7 +44,7 @@
        <i>OnPass</i> output, as long as the pl paths follow a <i>pl_path_N</i> naming scheme,
        where N is a whole number and all the nodes follow it incrementally,
        ie. <i>pl_path_1, pl_path_2, ...</i>
-     * max 128 nodes are supported, anywhere in range 0-999, althrough they do need to be
+     * max 128 nodes are supported, anywhere in range 0-128, althrough they do need to be
        sequential.
  
  * End the game when the logic_relay AttackerWin is triggered.
