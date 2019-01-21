@@ -12,11 +12,11 @@
 #include <sdktools>
 #include <neotokyo>
 
-#include "include/base.inc"
-#include "include/coordinator.inc"
-#include "include/events.inc"
-#include "include/teams.inc"
-#include "include/timer.inc"
+#include "include/neopl_base.inc"
+#include "include/neopl_coordinator.inc"
+#include "include/neopl_events.inc"
+#include "include/neopl_teams.inc"
+#include "include/neopl_timer.inc"
 
 public Plugin myinfo = {
     name = "NEOTOKYO° Payload",
