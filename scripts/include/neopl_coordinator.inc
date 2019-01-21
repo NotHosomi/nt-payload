@@ -107,18 +107,14 @@ int LookupMetaNodeVersion()
             continue;
         }
         if (!StrEqual(entName, "info_teleport_destination")) {
-            //PrintDebug(_, "no dice: %s", entName);
             continue;
         }
         if (GetEntPropString(i, Prop_Data, "m_iName",
             entName, sizeof(entName)) < 1)
         {
-            //PrintDebug(_, "Couldn't get path node name %s", entName);
             continue;
         }
         if (!StrContains(g_sPayloadMetaNodeName, entName)) {
-            /*PrintDebug(_, "%s does not contain %s",
-                entName, g_sPayloadMetaNodeName);*/
             continue;
         }
         const int charPos = sizeof(g_sPayloadMetaNodeName) - 1;
@@ -151,22 +147,15 @@ int LookupPathNodes()
         if (GetEntPropString(i, Prop_Data, "m_iName",
             entName, sizeof(entName)) < 1)
         {
-            //PrintDebug(_, "Couldn't get path node name %s", entName);
             continue;
         }
         if (!StrContains(entName, g_sPayloadPathNode)) {
-            /*PrintDebug(_, "%s does not contain %s",
-                entName, g_sPayloadPathNode);*/
             continue;
         }
         const int charPos = sizeof(g_sPayloadPathNode) - 1;
         if (!IsCharNumeric(entName[charPos])) {
-            /*PrintDebug(_, "Path was not numeric at pos %i of %s: %s",
-                charPos, entName, entName[charPos]);*/
             continue;
         }
-        /*PrintDebug(_, "Attempting to convert from %s char '%s'",
-            entName, entName[charPos]);*/
         int index = StringToInt(entName[charPos]);
         if (g_iPathNodes[index] != 0) {
             ThrowError("Node already exists for index %i", index);
@@ -175,7 +164,6 @@ int LookupPathNodes()
         if (index < lowestNode) {
             lowestNode = index;
         }
-        //PrintDebug(_, "Set path no. %i to node entity %i", index, i);
     }
     return lowestNode > maxEdicts ? -1 : lowestNode;
 }
@@ -221,8 +209,7 @@ static void CreateEntHooks()
         EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
         for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
             HookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
-                    entOutFunc, false);
-            //PrintDebug("Hooked %s to %s", g_iCoordinatorEnt[i], entOutFunc);
+                entOutFunc, false);
         }
     }
     HookEntityOutput("path_track", "OnPass", OnPass);
@@ -268,7 +255,6 @@ static void ClearPayloadCoordinators()
 {
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         if (g_iCoordinatorEnt[i] == 0) {
-            //PrintDebug(_, "Coord %i was already 0", i);
             continue;
         }
         if (IsValidEntity(g_iCoordinatorEnt[i])) {
@@ -297,7 +283,6 @@ static void ClearPayloadCoordinators()
 }
 
 // Convert the received output string into coordinator int enum value.
-// Can be cast into any coordinator enum.
 int GetCoordEnum(const char[] output)
 {
     for (int i = 0; i < MAX_COORDINATOR_INPUTS; i++) {
