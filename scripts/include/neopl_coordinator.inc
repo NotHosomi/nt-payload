@@ -233,8 +233,14 @@ int GetNumPathNodes()
     if (iStartNode == -1) {
         return 0;
     }
+    else if (iStartNode >= sizeof(g_iPathNodes)) {
+        ThrowError("Start node out of range");
+    }
     int numNodes = 0;
-    for (int i = iStartNode; g_iPathNodes[i] != 0; i++) {
+    for (int i = iStartNode; i < sizeof(g_iPathNodes); i++) {
+        if (g_iPathNodes[i] == 0) {
+            break;
+        }
         numNodes++;
     }
     return numNodes;
