@@ -128,7 +128,7 @@ int LookupMetaNodeVersion()
 // Iterate map edicts, and find all path_track nodes
 // following the payload naming scheme.
 // If nodes were found, return the index of the lowest node.
-// If nodes were not found, return -1.
+// If nodes were not found or there was a problem with them, return -1.
 int LookupPathNodes()
 {
     int maxEdicts = GetMaxEntities();
@@ -158,7 +158,9 @@ int LookupPathNodes()
         }
         int index = StringToInt(entName[charPos]);
         if (g_iPathNodes[index] != 0) {
-            ThrowError("Node already exists for index %i", index);
+            // Don't throw because this can happen due to mapper error.
+            PrintDebug(_, "Node already exists for index %i", index);
+            return -1;
         }
         g_iPathNodes[index] = i;
         if (index < lowestNode) {
