@@ -97,7 +97,7 @@ void EndPayload() {
     ClearTimers();
     ClearEntHooks();
     ClearPayloadCoordinators();
-    ClearPathNodes();
+    ClearPathNodes(g_iPathNodes, sizeof(g_iPathNodes));
 }
 
 int LookupMetaNodeVersion()
@@ -176,10 +176,10 @@ int LookupPathNodes()
     return lowestNode > maxEdicts ? -1 : lowestNode;
 }
 
-void ClearPathNodes()
+void ClearPathNodes(int[] nodes, const int numNodes)
 {
-    for (int i = 0; i < sizeof(g_iPathNodes); i++) {
-        g_iPathNodes[i] = 0;
+    for (int i = 0; i < numNodes; i++) {
+        nodes[i] = 0;
     }
 }
 
