@@ -37,10 +37,12 @@ new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
     // TimeControl: Increment deadline.
     "OnUser1",
     // TeamControl: Set the attacker as NSF.
-    // TimeControl: All attackers have exited the cart's push area. If overtime, this will end it.
+    // TimeControl: All attackers have exited the cart's push area.
+    //              If overtime, this will end it.
     "OnUser2",
     // TeamControl: Signal that the attacker has won the round.
-    // TimeControl: At least one attacker has entered the cart's push area. This allows for overtime.
+    // TimeControl: At least one attacker has entered the cart's push area.
+    //              This allows for overtime.
     "OnUser3",
     // TeamControl: No operation.
     // TimeControl: No operation.
