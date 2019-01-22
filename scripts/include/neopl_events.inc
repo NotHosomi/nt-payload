@@ -32,8 +32,8 @@ debug to server log and display in client console. 2 = same as 1, but also \
 print debug to client chat. 3 = same as 2, but also print debug to server \
 output.", FCVAR_NOTIFY, true, 0.0, true, 3.0);
 
-    decl String:mapCheckDesc[232];
-    Format(mapCheckDesc, sizeof(mapCheckDesc) + sizeof(payload_id) + 1,
+    decl String:mapCheckDesc[232 + sizeof(payload_id) + 1];
+    Format(mapCheckDesc, sizeof(mapCheckDesc),
         "If 0, only maps following the pattern mapname_%s(...) are considered \
 payload maps, and this plugin will auto-unload when changing to a non-payload map. \
 If 1, ignore the check and consider all maps as payload maps. Debug command.",
