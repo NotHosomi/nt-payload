@@ -3,7 +3,7 @@
 #endif
 #define _timer_
 
-// Bool flag to detect if we got interrupted.
+// Bool flags to detect if we got interrupted.
 static bool _dirtyDeadlineTimer = false, _dirtyOvertimeTimer = false;
 
 // Delete any existing deadline timers, and create a new one.
@@ -12,19 +12,20 @@ static bool _dirtyDeadlineTimer = false, _dirtyOvertimeTimer = false;
 // note that the timer will take the 10..9..8.. end of round timer
 // into account already - you will only need to provide it with the
 // desired round time remaining.
-void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs = 0.0)
+void CreateDeadlineTimer(const bool wantCustomTime = false,
+    float customTimeSecs = 0.0)
 {
     // Kill deadline timer, if it exists.
     if (g_hDeadline != null) {
         if (g_hDeadlineCountdown != null) {
-            LogError("%s Both deadline and countdown timers were active at the same time!",
-                g_sPluginTag);
+            LogError("%s Both deadline and countdown timers were active \
+at the same time!", g_sPluginTag);
             delete g_hDeadlineCountdown;
             g_hDeadlineCountdown = null;
         }
         if (g_hOvertimePoll != null) {
-            LogError("%s Both deadline and overtime timers were active at the same time!",
-                g_sPluginTag);
+            LogError("%s Both deadline and overtime timers were active \
+at the same time!", g_sPluginTag);
             delete g_hOvertimePoll;
             g_hOvertimePoll = null;
         }
@@ -53,7 +54,8 @@ void CreateDeadlineTimer(const bool wantCustomTime = false, float customTimeSecs
                 g_sPluginTag, customTimeSecs, minimumTimerLen); 
             customTimeSecs = minimumTimerLen;
             // We also need to update game timer if we correct.
-            // TODO: kind of messy, this should probably live in IncrementDeadline.
+            // TODO: kind of messy, this should probably live in
+            // IncrementDeadline.
             GameRules_SetPropFloat("m_fRoundTimeLeft", minimumTimerLen);
         }
         g_hDeadline = CreateTimer(
@@ -106,7 +108,8 @@ public Action Timer_Deadline(Handle timer)
         TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
     _dirtyDeadlineTimer = true;
     if (g_hDeadlineCountdown == null) {
-        LogError("%s Failed to create timer g_hDeadlineCountdown", g_sPluginTag);
+        LogError("%s Failed to create timer g_hDeadlineCountdown",
+            g_sPluginTag);
     }
     g_hDeadline = null;
     return Plugin_Stop;
@@ -126,8 +129,8 @@ public Action Timer_DeadlineCountdown(Handle timer)
         countdown = countdownSecs;
         _dirtyDeadlineTimer = false;
         if (g_hOvertimePoll != null) {
-            LogError("%s Both countdown and overtime timers were active at the same time!",
-                g_sPluginTag);
+            LogError("%s Both countdown and overtime timers were active \
+at the same time!", g_sPluginTag);
             delete g_hOvertimePoll;
             g_hOvertimePoll = null;
         }

@@ -40,9 +40,7 @@ void SetAttackingTeam(int team)
     if (team != TEAM_JINRAI && team != TEAM_NSF) {
         ThrowError("Tried to set invalid attacker (%i)", team);
     }
-
     g_iAttacker = team;
-
     // Map maker has the responsibility to set their
     // trigger to fire once per round to avoid message spam here.
     PayloadMessage("Attacking team is now %s", g_sTeamNames[team]);

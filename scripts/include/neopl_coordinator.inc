@@ -28,28 +28,32 @@ enum {
 
 // Possible inputs to fire into the coordinator outputs.
 // OnUserN is triggered by firing the matching "FireUserN" input;
-// e.g. logic_relay --> FireUser3 --> payload_coordinator = trigger attacker victory.
-// Note that the attacker must be set by using FireUser1 or 2 before sending the win signal.
+// e.g. logic_relay --> FireUser3 --> payload_coordinator = trigger attacker
+// victory.
+// Note that the attacker must be set by using FireUser1 or 2 before sending
+// the win signal.
 new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
-        // TeamControl: Set the attacker as Jinrai.
-        // TimeControl: Increment deadline.
-        "OnUser1",
-        // TeamControl: Set the attacker as NSF.
-        // TimeControl: All attackers have exited the cart's push area. If overtime, this will end it.
-        "OnUser2",
-        // TeamControl: Signal that the attacker has won the round.
-        // TimeControl: At least one attacker has entered the cart's push area. This allows for overtime.
-        "OnUser3",
-        // TeamControl: No operation.
-        // TimeControl: No operation.
-        "OnUser4"
+    // TeamControl: Set the attacker as Jinrai.
+    // TimeControl: Increment deadline.
+    "OnUser1",
+    // TeamControl: Set the attacker as NSF.
+    // TimeControl: All attackers have exited the cart's push area. If overtime, this will end it.
+    "OnUser2",
+    // TeamControl: Signal that the attacker has won the round.
+    // TimeControl: At least one attacker has entered the cart's push area. This allows for overtime.
+    "OnUser3",
+    // TeamControl: No operation.
+    // TimeControl: No operation.
+    "OnUser4"
 };
 // Sanity check for outputs; cannot have more than we define.
 #if sizeof(g_sCoordinatorOutputs) > MAX_COORDINATOR_INPUTS
 #error "Too many coordinator outputs."
 #endif
-// Target names that the logic_relays should fire into to communicate with this plugin.
-// These entities should not exist in the map, as they are created at runtime by this plugin!
+// Target names that the logic_relays should fire into to communicate with this
+// plugin.
+// These entities should not exist in the map, as they are created at runtime
+// by this plugin!
 new const String:g_sCoordinatorTargetname[COORDINATOR_ENUM_COUNT][] = {
     "pl_coord_team_control",
     "pl_coord_time_control"
@@ -193,8 +197,11 @@ Called while g_iCoordinatorEnt[%i] > 0", i);
         if (g_iCoordinatorEnt[i] == -1) {
             SetFailState("Coordinator creation failed");
         }
-        // Name the entity, so that Payload map logic can target fire events to it.
-        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname", g_sCoordinatorTargetname[i])) {
+        // Name the entity, so that Payload map logic can target
+        // fire events to it.
+        if (!DispatchKeyValue(g_iCoordinatorEnt[i], "targetname",
+            g_sCoordinatorTargetname[i]))
+        {
             SetFailState("Failed to dispatch targetname kv for coordinator");
         }
         if (!DispatchSpawn(g_iCoordinatorEnt[i])) {
@@ -208,10 +215,11 @@ static void CreateEntHooks()
     // Hook the coordinator output.
     g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
-        EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+        EntityOutput entOutFunc =
+            view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
         for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
-            HookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
-                entOutFunc, false);
+            HookSingleEntityOutput(g_iCoordinatorEnt[i],
+                g_sCoordinatorOutputs[j], entOutFunc, false);
         }
     }
     HookEntityOutput("path_track", "OnPass", OnPass);
@@ -262,13 +270,15 @@ static void ClearPayloadCoordinators()
         if (IsValidEntity(g_iCoordinatorEnt[i])) {
             decl String:entName[sizeof(g_sCoordinatorClassName)];
             if (!GetEntityClassname(g_iCoordinatorEnt[i],
-                entName, sizeof(entName))) {
+                entName, sizeof(entName)))
+            {
                 LogError(
                     "%s Failed to fetch previous coordinator classname from %i",
                     g_sPluginTag, i);
             }
             else {
-                PrintDebug(_, "Got valid coord %i with classname %s", i, entName);
+                PrintDebug(_, "Got valid coord %i with classname %s",
+                    i, entName);
                 if (StrEqual(entName, g_sCoordinatorClassName)) {
                     if (!AcceptEntityInput(g_iCoordinatorEnt[i], "kill")) {
                         LogError("%s Failed to kill previous coordinator %s",
@@ -303,10 +313,11 @@ static void ClearEntHooks()
         if (g_iCoordinatorEnt[i] == 0 || !IsValidEntity(g_iCoordinatorEnt[i])) {
             continue;
         }
-        EntityOutput entOutFunc = view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+        EntityOutput entOutFunc =
+            view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
         for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
-            UnhookSingleEntityOutput(g_iCoordinatorEnt[i], g_sCoordinatorOutputs[j],
-                entOutFunc);
+            UnhookSingleEntityOutput(g_iCoordinatorEnt[i],
+                g_sCoordinatorOutputs[j], entOutFunc);
         }
     }
     if (!UnhookEntityOutput("path_track", "OnPass", OnPass)) {
@@ -315,8 +326,8 @@ static void ClearEntHooks()
 }
 
 // Coordinate TeamControl output events sent to coordinator from the map.
-public void TeamControl(const char[] output, int caller,
-        int activator, float delay)
+public void TeamControl(const char[] output, int caller, int activator,
+    float delay)
 {
     PrintDebug(_, "TeamControl: %s", output);
 
@@ -334,8 +345,8 @@ public void TeamControl(const char[] output, int caller,
 }
 
 // Coordinate TimeControl output events sent to coordinator from the map.
-public void TimeControl(const char[] output, int caller,
-    int activator, float delay)
+public void TimeControl(const char[] output, int caller, int activator,
+    float delay)
 {
     PrintDebug(_, "TimeControl: %s", output);
     
@@ -347,9 +358,8 @@ public void TimeControl(const char[] output, int caller,
         // Only award extra time if not in overtime.
         if (g_hOvertimePoll == null) {
             IncrementDeadline();
-            PayloadMessage(
-                "Attackers have gained %i more seconds by reaching a checkpoint!",
-                g_cDeadlineExtendTime.IntValue);
+            PayloadMessage("Attackers have gained %i more seconds by \
+reaching a checkpoint!", g_cDeadlineExtendTime.IntValue);
         }
     }
     else if (cmdEnum == TIMECONTROL_OVERTIME_DISQUALIFY) {
