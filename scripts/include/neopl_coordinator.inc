@@ -12,6 +12,9 @@ enum {
     COORDINATOR_ENUM_COUNT
 };
 
+//The map logic cannot detect whether the attackers are Jinrai or NSF
+//Instead we could check the round number to see whether NSF or Jinrai should be spawing as Attackers
+//if (roundnumber % 2 == 0) then { attacker = jinrai }
 enum {
     TEAMCONTROL_ATTACKER_IS_JINRAI = 0,
     TEAMCONTROL_ATTACKER_IS_NSF,
