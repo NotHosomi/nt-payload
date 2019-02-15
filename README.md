@@ -37,7 +37,7 @@
        without breaking existing maps, should the plugin design ever change in the future.
  
  * Add time when each capturepoint logic_relay is triggered.
-     * this is done with a <i>FireUser1</i> call to <i>"pl_coord_time_control"</i> coordinator
+     * this is done with a <i>FireUser1</i> call to <i>"pl_coord_time_control"</i> coordinator.
  
  * Announce attacker progress percentage each time a payload path_track is passed.
      * map needs no triggers for this; it's done automatically by capturing the path nodes'
@@ -46,12 +46,14 @@
        ie. <i>pl_path_1, pl_path_2, ...</i>
      * max 128 nodes are supported, anywhere in range 0-127, althrough they do need to be
        sequential.
+       
+ * Set the attacking team at round beginning.
+     * this is done with 1 or more <i>trigger_once</i> brushes named "pl_attackerspawn",
+       placed in the attacker spawn such that they trigger as the attackers spawn.
+     * max supported brushes (4) is defined by the MAX_SPAWN_BRUSHES plugin define.
  
  * End the game when the logic_relay AttackerWin is triggered.
-     * this is done with <i>FireUser1</i> (Jinrai), or <i>FireUser2</i> (NSF) to set attacker at round begin...
-     * ...followed by <i>FireUser3</i> when the attacker deliver the payload to trigger the victory
-     * these inputs are fired to <i>"pl_coord_team_control"</i> coordinator
-     * the "set attacker" trigger should fire only once, to avoid chat spamming about who is attacking
+     * this is done with a <i>FireUser1</i> call to <i>"pl_coord_team_control"</i> coordinator.
  
  * Enter overtime when round time ends but attackers are still within the payload area.
      * when at least 1 attacker enters the payload push area, send a <i>FireUser3</i> to
