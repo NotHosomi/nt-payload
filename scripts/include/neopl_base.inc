@@ -3,7 +3,7 @@
 #endif
 #define _base_
 
-#define PLUGIN_VERSION "0.3"
+#define PLUGIN_VERSION "0.4"
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
@@ -136,6 +136,7 @@ void DeclareVictory(int winner)
     if (winner != TEAM_JINRAI && winner != TEAM_NSF) {
         PayloadMessage("Error with win condition; payload disabled for this \
 round!");
+        // DEBUG/TODO: this can throw if mapper fires the wrong input
         ThrowError("Declared winner with invalid team (%i)", winner);
     }
 

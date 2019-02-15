@@ -5,6 +5,7 @@
 
 #define MAX_COORDINATOR_INPUTS 4
 #define MAX_PATH_NODES 128
+#define MAX_SPAWN_BRUSHES 4
 
 enum {
     COORDINATOR_TEAMCONTROL = 0,
@@ -13,9 +14,7 @@ enum {
 };
 
 enum {
-    TEAMCONTROL_ATTACKER_IS_JINRAI = 0,
-    TEAMCONTROL_ATTACKER_IS_NSF,
-    TEAMCONTROL_ATTACKER_HAS_WON,
+    TEAMCONTROL_ATTACKER_HAS_WON = 0,
     TEAMCONTROL_ENUM_COUNT
 };
 
@@ -33,14 +32,14 @@ enum {
 // Note that the attacker must be set by using FireUser1 or 2 before sending
 // the win signal.
 new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
-    // TeamControl: Set the attacker as Jinrai.
+    // TeamControl: Signal that the attacker has won the round.
     // TimeControl: Increment deadline.
     "OnUser1",
-    // TeamControl: Set the attacker as NSF.
+    // TeamControl: No operation.
     // TimeControl: All attackers have exited the cart's push area.
     //              If overtime, this will end it.
     "OnUser2",
-    // TeamControl: Signal that the attacker has won the round.
+    // TeamControl: No operation.
     // TimeControl: At least one attacker has entered the cart's push area.
     //              This allows for overtime.
     "OnUser3",
@@ -75,22 +74,47 @@ new const String:g_sPayloadPathNode[] = "pl_path_";
 // but is meant for possible future backwards compatibility,
 // if the coordinator design ever changes.
 new const String:g_sPayloadMetaNodeName[] = "pl_meta_version_";
+// Create trigger_once brushes with this name, and place them
+// in the attacker spawn to indicate the attacking team.
+// Max supported brush amount is defined by MAX_SPAWN_BRUSHES.
+new const String:g_sPayloadSpawnBrush[] = "pl_attackerspawn";
 
 int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
 int g_iPathNodes[MAX_PATH_NODES] = { 0 };
 static int iStartNode = -1;
 
+int g_iSpawnBrushes[MAX_SPAWN_BRUSHES] = { 0 };
+int g_iNumSpawnNodes = 0;
+
 DataPack g_dpCoordFuncs = null;
 
 void StartPayload() {
     CreatePayloadCoordinators();
     CreateEntHooks();
+
     iStartNode = LookupPathNodes();
     if (iStartNode == -1) {
         PrintDebug(_, "Path nodes lookup failed. Is this a valid payload map?");
     }
+
     CreateDeadlineTimer();
+
+    g_iNumSpawnNodes = LookupSpawnBrushes(g_iSpawnBrushes, MAX_SPAWN_BRUSHES);
+    for (int i = 0; i < g_iNumSpawnNodes; i++) {
+        //PrintDebug(_, "Hooking spawn brush %i", g_iSpawnBrushes[i]);
+        SDKHook(g_iSpawnBrushes[i], SDKHook_StartTouchPost, SpawnBrushTouch);
+    }
+}
+
+void SpawnBrushTouch(int brush, int toucher)
+{
+    if (IsValidClient(toucher) && IsPlayerAlive(toucher)) {
+        int team = GetClientTeam(toucher);
+        if (team == TEAM_JINRAI || team == TEAM_NSF) {
+            SetAttackingTeam(team);
+        }
+    }
 }
 
 void EndPayload() {
@@ -98,6 +122,11 @@ void EndPayload() {
     ClearEntHooks();
     ClearPayloadCoordinators();
     ClearPathNodes(g_iPathNodes, sizeof(g_iPathNodes));
+
+    for (int i = 0; i < g_iNumSpawnNodes; i++) {
+        SDKUnhook(g_iSpawnBrushes[i], SDKHook_StartTouchPost, SpawnBrushTouch);
+    }
+    g_iNumSpawnNodes = 0;
 }
 
 int LookupMetaNodeVersion()
@@ -174,6 +203,42 @@ int LookupPathNodes()
         }
     }
     return lowestNode > maxEdicts ? -1 : lowestNode;
+}
+
+// Get an array of spawn attacker set brushes by reference.
+// Returns the amount of results found.
+int LookupSpawnBrushes(int[] brushes, const int maxBrushes)
+{
+    new const String:brushEnt[] = "trigger_once";
+    int maxEdicts = GetMaxEntities(), index = 0;
+    decl String:entName[sizeof(brushEnt)];
+    for (int i = 1; i < maxEdicts; i++) {
+        if (index == maxBrushes) {
+            //PrintDebug(_, "Reached maxBrushes");
+            break;
+        }
+        if (!IsValidEntity(i)) {
+            continue;
+        }
+        if (!GetEntityClassname(i, entName, sizeof(entName))) {
+            continue;
+        }
+        if (!StrEqual(entName, brushEnt)) {
+            continue;
+        }
+        if (GetEntPropString(i, Prop_Data, "m_iName",
+            entName, sizeof(entName)) < 1)
+        {
+            //PrintDebug(_, "brush m_iName failed");
+            continue;
+        }
+        if (!StrContains(entName, g_sPayloadSpawnBrush)) {
+            continue;
+        }
+        //PrintDebug(_, "Success %i", i);
+        brushes[index++] = i;
+    }
+    return index;
 }
 
 void ClearPathNodes(int[] nodes, const int numNodes)
@@ -339,10 +404,6 @@ public void TeamControl(const char[] output, int caller, int activator,
     }
     else if (cmdEnum == TEAMCONTROL_ATTACKER_HAS_WON) {
         DeclareVictory(GetAttackingTeam());
-    }
-    else {
-        int team = CoordEnumToTeamEnum(cmdEnum);
-        SetAttackingTeam(team);
     }
 }
 
