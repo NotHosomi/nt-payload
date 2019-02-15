@@ -71,11 +71,10 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
     // Only continue if this message is different from the last one.
     if (onlyOnce) {
         static char lastMessage[1024];
-        bool wasEqual = StrEqual(buffer, lastMessage);
-        strcopy(lastMessage, sizeof(lastMessage), buffer);
-        if (wasEqual) {
+        if (StrEqual(buffer, lastMessage)) {
             return;
         }
+        strcopy(lastMessage, sizeof(lastMessage), buffer);
     }
     if (g_cDebugLvl.IntValue >= DEBUGLVL_PUBLIC_TEST) {
         PrintToConsoleAll("[debug] %s", buffer);
