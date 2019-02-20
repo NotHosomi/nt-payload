@@ -29,7 +29,8 @@
 
 
 ### PLUGIN INTERACTIONS
- The plugin is required to do a few things when receiveing a set of outputs from the map
+ The plugin is required to do a few things when receiveing a set of outputs from the map:<br>
+ (TLDR: see the [I/O cheat sheet](#entity-io-cheat-sheet))
  
  * Keep track of which plugin version the map was built for.
      * payload maps must include one unused <i>info_teleport_destination</i>, with the name
