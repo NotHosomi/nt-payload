@@ -9,7 +9,7 @@
 
 ### Payload map-side logic
 
-  <b>TODO/FIXME</b>: currently out of date with plugin logic!<br>
+  <b>TODO/FIXME</b>: example maps are currently out of date with plugin logic!<br>
  <strike>For copy-pasting into a map, the spawnroom and the central room contain all required logic.</strike>
  
  Input firing is described under <a href="#plugin-interactions">Plugin interactions</a> below.
