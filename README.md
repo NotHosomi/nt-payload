@@ -19,12 +19,13 @@
   * Abide by the <a href="#plugin-interactions">Plugin interactions</a> rules.
 
 ### Gamemode
- <b>Attackers</b> can push the cart by standing near, the speed of the cart will increase for every <b>attacker</b> within range.
- If a <b>defender</b> is near the cart, it will not move.
+ <i>Attackers</i> can push the cart by standing near, the speed of the cart will increase for every <i>attacker</i> within range.
+ If a <i>defender</i> is near the cart, it will not move.
  Currently, there is **NO** rollback feature.
 
- Victory State is achieved by the final <i>path_track</i> sending an output to a <i>logic_relay</i> that will be used as a hook for the plugin to declare <b>attacker victory</b>.
- <b>Defenders</b> win if time runs out.
+ <b>Victory State</b> is achieved by the final <i>path_track</i> sending an output to a <i>logic_relay</i> that will be used as a hook for the plugin to declare <i>attacker victory</i>.
+ 
+ <i>Defenders</i> win if time runs out.
 
 ### Spawnrooms
   Movable spawns are implemented by using multiple <i>trigger_teleports</i>.
