@@ -25,6 +25,8 @@
 
  <b>Victory State</b> is achieved by the final <i>path_track</i> sending an output to a <i>logic_relay</i> that will be used as a hook for the plugin to declare <i>attacker victory</i>.
  
+ <b>Coordinators</b> are entities created by the plugin at runtime for sending receiving map events, as described in [Entity I/O cheat sheet](#entity-io-cheat-sheet).
+ 
  <i>Defenders</i> win if time runs out.
 
 ### Spawnrooms
