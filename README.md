@@ -69,6 +69,19 @@
  Alternatively we just use a text entity to say the current status of the cart at the bottom of the screen.
  * (Status messages are currently not implemented, just a bunch of debug messages and the like.)
 
+### Entity I/O cheat sheet
+| I/O target entity | I/O command | Resulting plugin action |
+|---|---|---|
+| pl_coord_team_control | FireUser1 | Signal that the attacker has won the round. |
+| pl_coord_team_control | FireUser2 | No operation. |
+| pl_coord_team_control | FireUser3 | No operation. |
+| pl_coord_team_control | FireUser4 | No operation. |
+| | | |
+| pl_coord_time_control | FireUser1 | Increment deadline. |
+| pl_coord_time_control | FireUser2 | All attackers have exited the cart's push area. If overtime, this will end it. |
+| pl_coord_time_control | FireUser3 | At least one attacker has entered the cart's push area. This allows for overtime. |
+| pl_coord_time_control | FireUser4 | No operation. |
+
 ### Further additions
  Rollback could be implemented using a delayed OnEndTouchAll and CancelPending
  HUD and cart notifications could be implemented with displaying text on player's screen
