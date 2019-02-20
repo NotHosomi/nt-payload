@@ -1,4 +1,13 @@
-### PAYLOAD MAP-SIDE LOGIC
+### Table of contents
+1. [Payload map-side logic](#payload-map-side-logic)
+2. [Mapmakers must...](#mapmakers-must)
+3. [Gamemode](#gamemode)
+4. [Spawnrooms](#spawnrooms)
+5. [Plugin interactions](#plugin-interactions)
+6. [Entity I/O cheat sheet](#entity-io-cheat-sheet)
+7. [Further additions](#further-additions)
+
+### Payload map-side logic
 
  For copy-pasting into a map, the spawnroom and the central room contain all required logic
  
@@ -6,13 +15,13 @@
  Input firing is described under <a href="#plugin-interactions">Plugin Interactions</a> below.
  
 
-### MAPMAKERS MUST
+### Mapmakers must...
   * make sure spawnrooms are inaccessible to the opposing team when active.
   * abide by the <a href="#plugin-interactions">Plugin Interactions</a> rules.
   
 
 
-### GAMEMODE
+### Gamemode
  ATTACKERS can push the cart by standing near, the speed of the cart will increase for every ATTACKER within range.
  If a DEFENDER is near the cart, it will not move.
  Currently, there is **NO** rollback feature.
@@ -22,13 +31,13 @@
 
 
 
-### SPAWNROOMS
+### Spawnrooms
   Movable spawns are implemented by using multiple trigger_teleports
   Spawn rooms are enabled and disabled by use of a logic_relay disabling and enabling the corresponding trigger_teleports
 
 
 
-### PLUGIN INTERACTIONS
+### Plugin interactions
  The plugin is required to do a few things when receiveing a set of outputs from the map:<br>
  (TLDR: see the [I/O cheat sheet](#entity-io-cheat-sheet))
  
