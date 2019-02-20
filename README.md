@@ -80,6 +80,8 @@
  * (Status messages are currently not implemented, just a bunch of debug messages and the like.)
 
 ### Entity I/O cheat sheet
+The target entities are created dynamically; do not create them in the level.
+
 | I/O target entity | I/O command | Resulting plugin action |
 |---|---|---|
 | pl_coord_team_control | FireUser1 | Signal that the attacker has won the round. |
