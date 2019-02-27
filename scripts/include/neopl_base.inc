@@ -3,7 +3,7 @@
 #endif
 #define _base_
 
-#define PLUGIN_VERSION "0.3"
+#define PLUGIN_VERSION "0.4"
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
@@ -18,7 +18,8 @@ enum {
 };
 
 // Payload maps are identified by the naming convention nt_mapname_gamemode,
-// where the third value divided by underscores equals this value (e.g. "nt_example_pl_a43").
+// where the third value divided by underscores equals this value
+// (e.g. "nt_example_pl_a43").
 new const String:payload_id[] = "pl";
 
 ConVar g_cRoundTime = null, g_cDeadlineExtendTime = null,
@@ -70,11 +71,10 @@ void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
     // Only continue if this message is different from the last one.
     if (onlyOnce) {
         static char lastMessage[1024];
-        bool wasEqual = StrEqual(buffer, lastMessage);
-        strcopy(lastMessage, sizeof(lastMessage), buffer);
-        if (wasEqual) {
+        if (StrEqual(buffer, lastMessage)) {
             return;
         }
+        strcopy(lastMessage, sizeof(lastMessage), buffer);
     }
     if (g_cDebugLvl.IntValue >= DEBUGLVL_PUBLIC_TEST) {
         PrintToConsoleAll("[debug] %s", buffer);
@@ -108,7 +108,8 @@ void AnnounceNodePass(int nodePos, int numNodesTotal)
     int percentComplete = RoundToNearest(100.0 * nodePos / numNodesTotal);
     // How many percent since the last announce?
     // If >= announce frequency, we're allowed to announce again.
-    if (percentComplete - iLastNodeAnnounce >= g_cNodePassAnnounceFreq.IntValue) {
+    if (percentComplete - iLastNodeAnnounce >= g_cNodePassAnnounceFreq.IntValue)
+    {
         PayloadMessage("Attacker progress: %i\%", percentComplete);
         iLastNodeAnnounce = percentComplete;
     }
@@ -132,7 +133,9 @@ void DeclareVictory(int winner)
     EndPayload();
 
     if (winner != TEAM_JINRAI && winner != TEAM_NSF) {
-        PayloadMessage("Error with win condition; payload disabled for this round!");
+        PayloadMessage("Error with win condition; payload disabled for this \
+round!");
+        // DEBUG/TODO: this can throw if mapper fires the wrong input
         ThrowError("Declared winner with invalid team (%i)", winner);
     }
 
@@ -141,7 +144,8 @@ void DeclareVictory(int winner)
     SoftKillTeam(GetOppositeTeam(winner));
 
     if (winner == GetAttackingTeam()) {
-        PayloadMessage("%s wins by delivering the payload!", g_sTeamNames[winner]);
+        PayloadMessage("%s wins by delivering the payload!",
+            g_sTeamNames[winner]);
     }
     else {
         PayloadMessage("%s wins by defending the base!", g_sTeamNames[winner]);
@@ -153,7 +157,6 @@ void SetRespawning(bool respawnEnabled)
 {
     const int respawn = 1, normal = 2;
     int gamestate;
-
     if (respawnEnabled) {
         gamestate = respawn;
         PayloadMessage("Respawning is now enabled");
@@ -161,7 +164,6 @@ void SetRespawning(bool respawnEnabled)
         gamestate = normal;
         PayloadMessage("Respawning is now disabled");
     }
-
     GameRules_SetProp("m_iGameState", gamestate);
 }
 
@@ -170,7 +172,7 @@ void UnloadSelf()
 {
     decl String:thisPluginFilename[32];
     GetPluginFilename(INVALID_HANDLE, thisPluginFilename,
-            sizeof(thisPluginFilename));
+        sizeof(thisPluginFilename));
     ServerCommand("sm plugins unload %s", thisPluginFilename);
 }
 
@@ -181,7 +183,8 @@ bool IsPayloadMap()
     GetCurrentMap(mapName, sizeof(mapName));
     
     char buffers[3][100];
-    int splits = ExplodeString(mapName, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+    int splits = ExplodeString(mapName, "_", buffers,
+        sizeof(buffers), sizeof(buffers[]));
     // Map name does not follow the "nt_mapname_gamemode" pattern.
     if (splits < 2) {
         return false;
