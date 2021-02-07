@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "4037"
-	"mapversion" "8"
+	"mapversion" "9"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -20,7 +20,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "8"
+	"mapversion" "9"
 	"classname" "worldspawn"
 	"skyname" "sky_day01_01"
 	"maxpropscreenwidth" "-1"
@@ -1539,6 +1539,7 @@ entity
 	{
 		"OnStartTouch" "pl_counter,Add,1,0,-1"
 		"OnEndTouch" "pl_counter,Subtract,1,0,-1"
+		"OnStartTouchAll" "pl_coord_time_control,FireUser3,,0,-1"
 	}
 	solid
 	{
