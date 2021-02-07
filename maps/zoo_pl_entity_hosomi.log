@@ -1198,3 +1198,124 @@ Reduced 292 texinfos to 207
 Reduced 23 texdatas to 22 (526 bytes to 465)
 Writing C:\Users\Hosomi\Desktop\Folders\Mapping\NT\Payload_Mapside\zoo_pl_entity_hosomi.bsp
 0 seconds elapsed
+
+
+
+materialPath: C:\Program Files (x86)\Steam\steamapps\common\neotokyo\mapping\materials
+Loading C:\Users\Hosomi\Desktop\Folders\Mapping\_NT\Payload\Payload_Mapside\maps\zoo_pl_entity_hosomi.vmf
+fixing up env_cubemap materials on brush sides...
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Processing areas...done (0)
+Building Faces...done (0)
+FixTjuncs...
+PruneNodes...
+WriteBSP...
+done (0)
+writing C:\Users\Hosomi\Desktop\Folders\Mapping\_NT\Payload\Payload_Mapside\maps\zoo_pl_entity_hosomi.prt...done (0)
+Creating default cubemaps for env_cubemap using skybox materials:
+skybox/sky_day01_01*.vmt
+Run buildcubemaps in the engine to get the correct cube maps.
+
+No such variable "$hdrbasetexture" for material "skybox/sky_day01_01rt"
+Can't load skybox file skybox/sky_day01_01 to build the default cubemap!
+Finding displacement neighbors...
+Finding lightmap sample positions...
+Displacement Alpha : 0...1...2...3...4...5...6...7...8...9...10
+Building Physics collision data...
+done (0) (47538 bytes)
+Placing detail props : 0...1...2...3...4...5...6...7...8...9...10
+Compacting texture/material tables...
+Reduced 292 texinfos to 207
+Reduced 23 texdatas to 22 (526 bytes to 465)
+Writing C:\Users\Hosomi\Desktop\Folders\Mapping\_NT\Payload\Payload_Mapside\maps\zoo_pl_entity_hosomi.bsp
+0 seconds elapsed
+
+
+
+4 threads
+reading c:\users\hosomi\desktop\folders\mapping\_nt\payload\payload_mapside\maps\zoo_pl_entity_hosomi.bsp
+reading c:\users\hosomi\desktop\folders\mapping\_nt\payload\payload_mapside\maps\zoo_pl_entity_hosomi.prt
+ 118 portalclusters
+ 295 numportals
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Optimized: 6 visible clusters (0.00%)
+Total clusters visible: 5138
+Average clusters visible: 43
+Building PAS...
+Average clusters audible: 91
+visdatasize:4182  compressed from 3776
+writing c:\users\hosomi\desktop\folders\mapping\_nt\payload\payload_mapside\maps\zoo_pl_entity_hosomi.bsp
+0 seconds elapsed
+
+
+
+Could not find lights.rad in lights.rad.
+Trying VRAD BIN directory instead...
+Warning: Couldn't open texlight file c:\Program Files (x86)\steam\steamapps\common\sourcesdk\bin\ep1\bin\lights.rad.
+Loading c:\users\hosomi\desktop\folders\mapping\_nt\payload\payload_mapside\maps\zoo_pl_entity_hosomi.bsp
+603 faces
+61800 square feet [8899210.00 square inches]
+0 displacements
+0 square feet [0.00 square inches]
+603 patches before subdivision
+8419 patches after subdivision
+0 direct lights
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10transfers 913632, max 336
+transfer lists:   7.0 megs
+0...1...2...3...4...5...6...7...8...9...10	Bounce #1 added RGB(0, 0, 0)
+Build Patch/Sample Hash Table(s).....Done<0.0022 sec>
+0...1...2...3...4...5...6...7...8...9...10FinalLightFace Done
+0 of 0 (0% of) surface lights went in leaf ambient cubes.
+ComputePerLeafAmbientLighting: 0...1...2...3...4...5...6...7...8...9...10
+Ready to Finish
+
+Object names       Objects/Maxobjs  Memory / Maxmem  Fullness 
+------------       ---------------  ---------------  -------- 
+models                  31/1024         1488/49152    ( 3.0%) 
+brushes                113/8192         1356/98304    ( 1.4%) 
+brushsides             708/65536        5664/524288   ( 1.1%) 
+planes                 478/65536        9560/1310720  ( 0.7%) 
+vertexes              1044/65536       12528/786432   ( 1.6%) 
+nodes                  421/65536       13472/2097152  ( 0.6%) 
+texinfos               207/12288       14904/884736   ( 1.7%) 
+texdata                 22/2048          704/65536    ( 1.1%) 
+dispinfos                0/0               0/0        ( 0.0%) 
+disp_verts               0/0               0/0        ( 0.0%) 
+disp_tris                0/0               0/0        ( 0.0%) 
+disp_lmsamples           0/0               0/0        ( 0.0%) 
+faces                  603/65536       33768/3670016  ( 0.9%) 
+hdr faces                0/65536           0/3670016  ( 0.0%) 
+origfaces              428/65536       23968/3670016  ( 0.7%) 
+leaves                 453/65536       14496/2097152  ( 0.7%) 
+leaffaces              709/65536        1418/131072   ( 1.1%) 
+leafbrushes            168/65536         336/131072   ( 0.3%) 
+areas                    4/256            32/2048     ( 1.6%) 
+surfedges             4446/512000      17784/2048000  ( 0.9%) 
+edges                 2460/256000       9840/1024000  ( 1.0%) 
+LDR worldlights          0/8192            0/720896   ( 0.0%) 
+HDR worldlights          0/8192            0/720896   ( 0.0%) 
+waterstrips             32/32768         320/327680   ( 0.1%) 
+waterverts               0/65536           0/786432   ( 0.0%) 
+waterindices           726/65536        1452/131072   ( 1.1%) 
+cubemapsamples           0/1024            0/16384    ( 0.0%) 
+overlays                 7/512          2464/180224   ( 1.4%) 
+LDR lightdata         [variable]      164956/0        ( 0.0%) 
+HDR lightdata         [variable]           0/0        ( 0.0%) 
+visdata               [variable]        4182/16777216 ( 0.0%) 
+entdata               [variable]       36244/393216   ( 9.2%) 
+LDR leaf ambient       453/65536       10872/1572864  ( 0.7%) 
+HDR leaf ambient         0/65536           0/1572864  ( 0.0%) 
+occluders                0/0               0/0        ( 0.0%) 
+occluder polygons        0/0               0/0        ( 0.0%) 
+occluder vert ind        0/0               0/0        ( 0.0%) 
+detail props          [variable]           1/12       ( 8.3%) 
+static props          [variable]           1/396      ( 0.3%) 
+pakfile               [variable]       20392/0        ( 0.0%) 
+
+Level flags = 0
+
+Win32 Specific Data:
+physics               [variable]       47538/4194304  ( 1.1%) 
+==== Total Win32 BSP file data space used: 449740 bytes ====
+
+Total triangle count: 1528
+Writing c:\users\hosomi\desktop\folders\mapping\_nt\payload\payload_mapside\maps\zoo_pl_entity_hosomi.bsp
+0 seconds elapsed

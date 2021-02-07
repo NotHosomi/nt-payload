@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "4037"
-	"mapversion" "104"
+	"mapversion" "105"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -20,7 +20,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "104"
+	"mapversion" "105"
 	"classname" "worldspawn"
 	"skyname" "sky_day01_01"
 	"maxpropscreenwidth" "-1"
@@ -11140,7 +11140,7 @@ entity
 	"targetname" "AttackerWin"
 	connections
 	{
-		"OnTrigger" "payload_coordinator,FireUser3,,0,-1"
+		"OnTrigger" "pl_coord_team_control,FireUser1,,0,-1"
 	}
 	"origin" "-256 192 88"
 	editor
@@ -11160,6 +11160,7 @@ entity
 	connections
 	{
 		"OnTrigger" "pl_cp1_indicator,Skin,7,0,-1"
+		"OnTrigger" "pl_coord_time_control,FireUser1,,0,-1"
 	}
 	"origin" "-1024 192 88"
 	editor
@@ -11221,6 +11222,7 @@ entity
 		"OnTrigger" "AttackerSpawnTele2,Enable,,0,-1"
 		"OnTrigger" "DefenderSpawnTele2,Enable,,0,-1"
 		"OnTrigger" "DefenderSpawnTele1,Disable,,0,-1"
+		"OnTrigger" "pl_coord_time_control,FireUser1,,0,-1"
 	}
 	"origin" "-768 192 88"
 	editor
@@ -11307,6 +11309,7 @@ entity
 		"OnTrigger" "pl_cp3_indicator,Skin,7,0,-1"
 		"OnTrigger" "AttackerSpawnTele3,Enable,,0,-1"
 		"OnTrigger" "AttackerSpawnTele2,Disable,,0,-1"
+		"OnTrigger" "pl_coord_time_control,FireUser1,,0,-1"
 	}
 	"origin" "-512 192 88"
 	editor
@@ -11353,44 +11356,6 @@ entity
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
 		"logicalpos" "[0 11500]"
-	}
-}
-entity
-{
-	"id" "8118"
-	"classname" "logic_relay"
-	"StartDisabled" "0"
-	"targetname" "SetAttackerAsJinrai"
-	connections
-	{
-		"OnTrigger" "payload_coordinator,FireUser1,,0,-1"
-	}
-	"origin" "-187.872 60.8752 72"
-	editor
-	{
-		"color" "220 30 220"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "8120"
-	"classname" "logic_relay"
-	"StartDisabled" "0"
-	"targetname" "SetAttackerAsNSF"
-	connections
-	{
-		"OnTrigger" "payload_coordinator,FireUser2,,0,-1"
-	}
-	"origin" "-155.872 60.8752 72"
-	editor
-	{
-		"color" "220 30 220"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
 	}
 }
 entity
@@ -11534,7 +11499,7 @@ entity
 	"uv1" "-64 64 0"
 	"uv2" "64 64 0"
 	"uv3" "64 -64 0"
-	"sides" "600"
+	"sides" "1476"
 	"angles" "0 90 0"
 	"origin" "-960 -320 64"
 	editor
