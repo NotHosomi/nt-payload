@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "4037"
-	"mapversion" "7"
+	"mapversion" "8"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -20,7 +20,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "7"
+	"mapversion" "8"
 	"classname" "worldspawn"
 	"skyname" "sky_day01_01"
 	"maxpropscreenwidth" "-1"
@@ -1059,11 +1059,12 @@ entity
 	"StartDisabled" "0"
 	"startvalue" "0"
 	"min" "0"
-	"max" "0"
+	"max" "32"
 	"targetname" "pl_counter"
 	connections
 	{
 		"OutValue" "pl_case,InValue,,0,-1"
+		"OnGetValue" "pl_case,InValue,,0,-1"
 	}
 	"origin" "-576 96 16.25"
 	editor
@@ -1083,11 +1084,12 @@ entity
 	"StartDisabled" "0"
 	"startvalue" "0"
 	"min" "0"
-	"max" "0"
+	"max" "32"
 	"targetname" "pl_counterB"
 	connections
 	{
 		"OutValue" "pl_caseB,InValue,,0,-1"
+		"OnHitMin" "pl_coord_time_control,FireUser1,,0,-1"
 	}
 	"origin" "-576 96 48.25"
 	editor
@@ -1166,6 +1168,7 @@ entity
 		"OnCase16" "pl_relay01,Enable,,0,-1"
 		"OnCase16" "pl_relay02,Enable,,0,-1"
 		"OnCase16" "pl_relay03,Enable,,0,-1"
+		"OnCase16" "pl_counter,GetValue,,0,-1"
 	}
 	"origin" "-544 96 48.25"
 	editor
@@ -1187,7 +1190,7 @@ entity
 	"spawnflags" "0"
 	connections
 	{
-		"OnTrigger" "pl_train,SetSpeed,0.33,0,-1"
+		"OnTrigger" "pl_train,SetSpeed,0.25,0,-1"
 	}
 	"origin" "-512 96 20.25"
 	editor
@@ -1209,7 +1212,7 @@ entity
 	"spawnflags" "0"
 	connections
 	{
-		"OnTrigger" "pl_train,SetSpeed,0.33,0,-1"
+		"OnTrigger" "pl_train,SetSpeed,0.35,0,-1"
 	}
 	"origin" "-512 96 36.25"
 	editor
@@ -1231,7 +1234,7 @@ entity
 	"spawnflags" "0"
 	connections
 	{
-		"OnTrigger" "pl_train,SetSpeed,0.33,0,-1"
+		"OnTrigger" "pl_train,SetSpeed,0.45,0,-1"
 	}
 	"origin" "-512 96 52.25"
 	editor
