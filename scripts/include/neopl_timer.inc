@@ -1,7 +1,7 @@
-#if defined _timer_
+#if defined _ntpl_timer_
     #endinput
 #endif
-#define _timer_
+#define _ntpl_timer_
 
 // Bool flags to detect if we got interrupted.
 static bool _dirtyDeadlineTimer = false, _dirtyOvertimeTimer = false;
@@ -51,7 +51,7 @@ at the same time!", g_sPluginTag);
         float minimumTimerLen = 2 * countdownSecs + timerInaccuracy;
         if (customTimeSecs < minimumTimerLen) {
             LogError("%s customTimeSecs of %f is too small; adjusting to %f",
-                g_sPluginTag, customTimeSecs, minimumTimerLen); 
+                g_sPluginTag, customTimeSecs, minimumTimerLen);
             customTimeSecs = minimumTimerLen;
             // We also need to update game timer if we correct.
             // TODO: kind of messy, this should probably live in
@@ -94,6 +94,7 @@ void ClearTimers()
 public Action Timer_DelayedSetRespawn(Handle timer)
 {
     SetRespawning(true);
+    return Plugin_Stop;
 }
 
 // Deadline for delivering the Payload has passed; defenders win.
@@ -163,7 +164,7 @@ public Action Timer_Overtime(Handle timer)
                 secsSinceAnnounce = 0;
             }
         }
-        GameRules_SetPropFloat("m_fRoundTimeLeft", 818.0);
+        GameRules_SetPropFloat("m_fRoundTimeLeft", 818.0);  // "13:37" time
         return Plugin_Continue;
     }
     secsSinceAnnounce = 0;

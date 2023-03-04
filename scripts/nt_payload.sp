@@ -1,9 +1,8 @@
 /*
     This is an accompanying plugin for a custom Neotokyo Payload game mode.
-    For map makers: see the comments on usage starting around line 24 in base.inc
-    
-    An example .vmf with logic_relays implemented:
-    https://gist.githubusercontent.com/Rainyan/b1c48f048e15f62999aeb2f66f22e56b/raw/f29762a21ab1b04aecc97005c0ab17a7c500a5ed/nt_payload_plugin-relays.vmf
+    For map makers:
+        Please see the repository for documentation and example maps:
+        https://github.com/NotHosomi/nt-payload
 */
 
 #pragma semicolon 1
@@ -13,6 +12,7 @@
 #include <sdktools>
 #include <neotokyo>
 
+#include "include/neopl_shims.inc"
 #include "include/neopl_base.inc"
 #include "include/neopl_coordinator.inc"
 #include "include/neopl_events.inc"

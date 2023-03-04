@@ -1,6 +1,12 @@
-# compile helper scripts etc.
+# ad-hoc helper scripts etc.
+*.bat
 *.cmd
+
+# plugin compile artifacts
+*.smx
+
+# map compile artifacts
+*.log
+*.bsp
 *.vmx
 *.prt
-# compiled plugin binaries
-*.smx
