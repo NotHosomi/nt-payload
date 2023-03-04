@@ -1,9 +1,16 @@
-#if defined _base_
+#if defined _ntpl_base_
     #endinput
 #endif
-#define _base_
+#define _ntpl_base_
 
-#define PLUGIN_VERSION "0.4"
+#define PLUGIN_VERSION "0.5"
+
+// This is the .vmf versioning "pl_meta_version_N" integer,
+// used for map backwards compatibility.
+// Whenever the .vmf parsing gets updated in a backwards-incompatible way,
+// this value should be incremented. Note however that doing so will
+// break all older PL maps, so it shouldn't be done lightly.
+#define NEOPL_META_VERSION 2
 
 new const String:g_sPluginTag[] = "[PAYLOAD]";
 new const String:g_sTeamNames[][] = {
@@ -55,6 +62,10 @@ void PayloadMessage(const char[] message, any ...)
     decl String:buffer[bufLen];
     VFormat(buffer, bufLen, message, 2);
     PrintToChatAll("%s %s", g_sPluginTag, buffer);
+    if (g_cDebugLvl.IntValue >= DEBUGLVL_DEV)
+    {
+        PrintToServer("%s %s", g_sPluginTag, buffer);
+    }
 }
 
 void PrintDebug(bool onlyOnce = true, const char[] msg, any ...)
@@ -105,13 +116,20 @@ void AnnounceNodePass(int nodePos, int numNodesTotal)
     else if (nodePos > numNodesTotal) {
         ThrowError("Got node pos higher than nodes total");
     }
+
+    // We've already passed this node.
+    if (nodePos <= iLastNodeAnnounce) {
+        return;
+    }
+
     int percentComplete = RoundToNearest(100.0 * nodePos / numNodesTotal);
+    int lastPercentComplete = RoundToNearest(100.0 * iLastNodeAnnounce / numNodesTotal);
     // How many percent since the last announce?
     // If >= announce frequency, we're allowed to announce again.
-    if (percentComplete - iLastNodeAnnounce >= g_cNodePassAnnounceFreq.IntValue)
+    if (percentComplete - lastPercentComplete >= g_cNodePassAnnounceFreq.IntValue)
     {
         PayloadMessage("Attacker progress: %i\%", percentComplete);
-        iLastNodeAnnounce = percentComplete;
+        iLastNodeAnnounce = nodePos;
     }
 }
 
@@ -181,7 +199,7 @@ bool IsPayloadMap()
 {
     decl String:mapName[128];
     GetCurrentMap(mapName, sizeof(mapName));
-    
+
     char buffers[3][100];
     int splits = ExplodeString(mapName, "_", buffers,
         sizeof(buffers), sizeof(buffers[]));
@@ -189,5 +207,10 @@ bool IsPayloadMap()
     if (splits < 2) {
         return false;
     }
-    return StrEqual(buffers[2], payload_id);
+    return StrEqual(buffers[splits - 1], payload_id);
+}
+
+void ClearBase()
+{
+    iLastNodeAnnounce = 0;
 }

@@ -5,7 +5,8 @@
 
 #define MAX_COORDINATOR_INPUTS 4
 #define MAX_PATH_NODES 128
-#define MAX_SPAWN_BRUSHES 4
+
+#define PL_NAMES_CASE_SENSITIVE false
 
 enum {
     COORDINATOR_TEAMCONTROL = 0,
@@ -15,6 +16,7 @@ enum {
 
 enum {
     TEAMCONTROL_ATTACKER_HAS_WON = 0,
+    TEAMCONTROL_SET_ATTACKER_TEAM,
     TEAMCONTROL_ENUM_COUNT
 };
 
@@ -32,24 +34,26 @@ enum {
 // Note that the attacker must be set by using FireUser1 or 2 before sending
 // the win signal.
 new const String:g_sCoordinatorOutputs[MAX_COORDINATOR_INPUTS][] = {
-    // TeamControl: Signal that the attacker has won the round.
-    // TimeControl: Increment deadline.
+    // OnUser1 TeamControl: Signal that the attacker has won the round.
+    // OnUser1 TimeControl: Increment deadline.
     "OnUser1",
-    // TeamControl: No operation.
-    // TimeControl: All attackers have exited the cart's push area.
-    //              If overtime, this will end it.
+    // OnUser2 TeamControl: Set attacker team to the team of the activator (player).
+    // OnUser2 TimeControl: All attackers have exited the cart's push area.
+    //                      If overtime, this will end it.
     "OnUser2",
-    // TeamControl: No operation.
-    // TimeControl: At least one attacker has entered the cart's push area.
-    //              This allows for overtime.
+    // OnUser3 TeamControl: No operation.
+    // OnUser3 TimeControl: At least one attacker has entered the cart's push area.
+    //                      This allows for overtime.
     "OnUser3",
-    // TeamControl: No operation.
-    // TimeControl: No operation.
+    // OnUser4 TeamControl: No operation.
+    // OnUser4 TimeControl: No operation.
     "OnUser4"
 };
+#if SOURCEMOD_V_MAJOR <= 1 && SOURCEMOD_V_MINOR <= 10
 // Sanity check for outputs; cannot have more than we define.
 #if sizeof(g_sCoordinatorOutputs) > MAX_COORDINATOR_INPUTS
 #error "Too many coordinator outputs."
+#endif
 #endif
 // Target names that the logic_relays should fire into to communicate with this
 // plugin.
@@ -67,6 +71,7 @@ new const String:g_sCoordinatorClassName[] = "info_teleport_destination";
 // Node link is allowed to start anywhere in range 0-127,
 // althought starting with 1 or 0 is probably most readable.
 // Max amount of nodes: 128.
+
 new const String:g_sPayloadPathNode[] = "pl_path_";
 // Metadata about the payload version a map was built for.
 // Payload map must have a info_teleport_destination with its
@@ -74,18 +79,11 @@ new const String:g_sPayloadPathNode[] = "pl_path_";
 // but is meant for possible future backwards compatibility,
 // if the coordinator design ever changes.
 new const String:g_sPayloadMetaNodeName[] = "pl_meta_version_";
-// Create trigger_once brushes with this name, and place them
-// in the attacker spawn to indicate the attacking team.
-// Max supported brush amount is defined by MAX_SPAWN_BRUSHES.
-new const String:g_sPayloadSpawnBrush[] = "pl_attackerspawn";
 
 int g_iCoordinatorEnt[COORDINATOR_ENUM_COUNT] = { 0 };
 
 int g_iPathNodes[MAX_PATH_NODES] = { 0 };
 static int iStartNode = -1;
-
-int g_iSpawnBrushes[MAX_SPAWN_BRUSHES] = { 0 };
-int g_iNumSpawnNodes = 0;
 
 DataPack g_dpCoordFuncs = null;
 
@@ -99,22 +97,6 @@ void StartPayload() {
     }
 
     CreateDeadlineTimer();
-
-    g_iNumSpawnNodes = LookupSpawnBrushes(g_iSpawnBrushes, MAX_SPAWN_BRUSHES);
-    for (int i = 0; i < g_iNumSpawnNodes; i++) {
-        //PrintDebug(_, "Hooking spawn brush %i", g_iSpawnBrushes[i]);
-        SDKHook(g_iSpawnBrushes[i], SDKHook_StartTouchPost, SpawnBrushTouch);
-    }
-}
-
-void SpawnBrushTouch(int brush, int toucher)
-{
-    if (IsValidClient(toucher) && IsPlayerAlive(toucher)) {
-        int team = GetClientTeam(toucher);
-        if (team == TEAM_JINRAI || team == TEAM_NSF) {
-            SetAttackingTeam(team);
-        }
-    }
 }
 
 void EndPayload() {
@@ -122,11 +104,8 @@ void EndPayload() {
     ClearEntHooks();
     ClearPayloadCoordinators();
     ClearPathNodes(g_iPathNodes, sizeof(g_iPathNodes));
-
-    for (int i = 0; i < g_iNumSpawnNodes; i++) {
-        SDKUnhook(g_iSpawnBrushes[i], SDKHook_StartTouchPost, SpawnBrushTouch);
-    }
-    g_iNumSpawnNodes = 0;
+    ClearBase();
+    ClearAttackingTeam();
 }
 
 int LookupMetaNodeVersion()
@@ -149,9 +128,10 @@ int LookupMetaNodeVersion()
         {
             continue;
         }
-        if (!StrContains(g_sPayloadMetaNodeName, entName)) {
+        if (StrContains(entName, g_sPayloadMetaNodeName, PL_NAMES_CASE_SENSITIVE) != 0) {
             continue;
         }
+        PrintToServer("Found: %s", entName);
         const int charPos = sizeof(g_sPayloadMetaNodeName) - 1;
         version = StringToInt(entName[charPos]);
         break;
@@ -159,16 +139,15 @@ int LookupMetaNodeVersion()
     return version;
 }
 
-// TODO: run only once per map to avoid expensive string operations
-// Iterate map edicts, and find all path_track nodes
-// following the payload naming scheme.
+// Iterate map edicts, and find all path_track nodes following the payload naming scheme.
 // If nodes were found, return the index of the lowest node.
 // If nodes were not found or there was a problem with them, return -1.
 int LookupPathNodes()
 {
     int maxEdicts = GetMaxEntities();
     int lowestNode = maxEdicts + 1;
-    decl String:entName[12]; // strlen("path_track") + 1
+    // Allocate for maxlen of ("pl_path_" + strlen(MAX_PATH_NODES) + 0)
+    decl String:entName[12];
     for (int i = 1; i <= maxEdicts; i++) {
         if (!IsValidEntity(i)) {
             continue;
@@ -184,7 +163,7 @@ int LookupPathNodes()
         {
             continue;
         }
-        if (!StrContains(entName, g_sPayloadPathNode)) {
+        if (StrContains(entName, g_sPayloadPathNode, PL_NAMES_CASE_SENSITIVE) != 0) {
             continue;
         }
         const int charPos = sizeof(g_sPayloadPathNode) - 1;
@@ -203,42 +182,6 @@ int LookupPathNodes()
         }
     }
     return lowestNode > maxEdicts ? -1 : lowestNode;
-}
-
-// Get an array of spawn attacker set brushes by reference.
-// Returns the amount of results found.
-int LookupSpawnBrushes(int[] brushes, const int maxBrushes)
-{
-    new const String:brushEnt[] = "trigger_once";
-    int maxEdicts = GetMaxEntities(), index = 0;
-    decl String:entName[sizeof(brushEnt)];
-    for (int i = 1; i < maxEdicts; i++) {
-        if (index == maxBrushes) {
-            //PrintDebug(_, "Reached maxBrushes");
-            break;
-        }
-        if (!IsValidEntity(i)) {
-            continue;
-        }
-        if (!GetEntityClassname(i, entName, sizeof(entName))) {
-            continue;
-        }
-        if (!StrEqual(entName, brushEnt)) {
-            continue;
-        }
-        if (GetEntPropString(i, Prop_Data, "m_iName",
-            entName, sizeof(entName)) < 1)
-        {
-            //PrintDebug(_, "brush m_iName failed");
-            continue;
-        }
-        if (!StrContains(entName, g_sPayloadSpawnBrush)) {
-            continue;
-        }
-        //PrintDebug(_, "Success %i", i);
-        brushes[index++] = i;
-    }
-    return index;
 }
 
 void ClearPathNodes(int[] nodes, const int numNodes)
@@ -282,8 +225,17 @@ static void CreateEntHooks()
     // Hook the coordinator output.
     g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
+#if SOURCEMOD_V_MAJOR <= 1 && SOURCEMOD_V_MINOR <= 10
         EntityOutput entOutFunc =
             view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+#else
+        // HACK: This raises a compiler warning because we're relying on the implementation
+        // detail of size of function pointer equaling the size of int. Should ideally
+        // completely refactor this into something more compatible, but for now this is
+        // good enough to allow us to actually compile successfully in the SM 1.11-1.12 range.
+        EntityOutput entOutFunc =
+            view_as<EntityOutput>(view_as<int>(g_dpCoordFuncs.ReadFunction()));
+#endif
         for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
             HookSingleEntityOutput(g_iCoordinatorEnt[i],
                 g_sCoordinatorOutputs[j], entOutFunc, false);
@@ -374,14 +326,14 @@ int GetCoordEnum(const char[] output)
 
 // Remove the entity hooks.
 static void ClearEntHooks()
-{        
+{
     g_dpCoordFuncs.Reset();
     for (int i = 0; i < COORDINATOR_ENUM_COUNT; i++) {
         if (g_iCoordinatorEnt[i] == 0 || !IsValidEntity(g_iCoordinatorEnt[i])) {
             continue;
         }
         EntityOutput entOutFunc =
-            view_as<EntityOutput>(g_dpCoordFuncs.ReadFunction());
+            view_as<EntityOutput>(view_as<int>(g_dpCoordFuncs.ReadFunction()));
         for (int j = 0; j < MAX_COORDINATOR_INPUTS; j++) {
             UnhookSingleEntityOutput(g_iCoordinatorEnt[i],
                 g_sCoordinatorOutputs[j], entOutFunc);
@@ -405,6 +357,14 @@ public void TeamControl(const char[] output, int caller, int activator,
     else if (cmdEnum == TEAMCONTROL_ATTACKER_HAS_WON) {
         DeclareVictory(GetAttackingTeam());
     }
+    else if (cmdEnum == TEAMCONTROL_SET_ATTACKER_TEAM) {
+        if (IsValidClient(activator)) {
+            int team = GetClientTeam(activator);
+            if (team == TEAM_JINRAI || team == TEAM_NSF) {
+                SetAttackingTeam(team);
+            }
+        }
+    }
 }
 
 // Coordinate TimeControl output events sent to coordinator from the map.
@@ -412,7 +372,7 @@ public void TimeControl(const char[] output, int caller, int activator,
     float delay)
 {
     PrintDebug(_, "TimeControl: %s", output);
-    
+
     int cmdEnum = GetCoordEnum(output);
     if (cmdEnum == -1) {
         ThrowError("GetCoordEnum failed on output: %s", output);
@@ -420,6 +380,17 @@ public void TimeControl(const char[] output, int caller, int activator,
     else if (cmdEnum == TIMECONTROL_INCREMENT) {
         // Only award extra time if not in overtime.
         if (g_hOvertimePoll == null) {
+            // We ensure that the activator is the payload cart,
+            // because mapper error can also trigger this, leading to
+            // incorrect game mode logic.
+            char correctPayloadEntity[] = "func_tracktrain";
+            char buffActivator[16]; // strlen("func_tracktrain") + 1
+            GetEntityClassname(activator, buffActivator, sizeof(buffActivator));
+            if (!StrEqual(buffActivator, correctPayloadEntity)) {
+                ThrowError("Mapper error: TIMECONTROL_INCREMENT was triggered by entity: \"%s\" \
+(should always be: \"%s\").\nOutput: %s\nCaller: %d\nActivator: %d",
+                    buffActivator, correctPayloadEntity, output, caller, activator);
+            }
             IncrementDeadline();
             PayloadMessage("Attackers have gained %i more seconds by \
 reaching a checkpoint!", g_cDeadlineExtendTime.IntValue);

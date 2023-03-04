@@ -1,7 +1,7 @@
-#if defined _teams_
+#if defined _ntpl_teams_
     #endinput
 #endif
-#define _teams_
+#define _ntpl_teams_
 
 static int g_iAttacker = TEAM_NONE;
 
@@ -45,4 +45,9 @@ int GetDefendingTeam()
 int GetOppositeTeam(int team)
 {
     return team == TEAM_JINRAI ? TEAM_NSF : TEAM_JINRAI;
+}
+
+void ClearAttackingTeam()
+{
+    g_iAttacker = TEAM_NONE;
 }

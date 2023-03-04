@@ -1,7 +1,7 @@
-#if defined _events_
+#if defined _ntpl_events_
     #endinput
 #endif
-#define _events_
+#define _ntpl_events_
 
 public void OnPluginStart()
 {
@@ -17,11 +17,11 @@ public void OnPluginStart()
     g_cRoundTime = CreateConVar("sm_neopayload_roundtime", "10",
         "Payload round time, in minutes.", FCVAR_NOTIFY,
         true, minRoundTime, true, maxRoundTime);
-    
+
     CreateConVar("sm_neopayload_version", PLUGIN_VERSION,
         "Neotokyo Payload plugin version.",
         FCVAR_NOTIFY | FCVAR_DONTRECORD | FCVAR_SPONLY);
-    
+
     g_cDeadlineExtendTime = CreateConVar("sm_neopayload_deadline_extend_time",
         "30", "How much to extend payload deadline upon attackers reaching \
 a checkpoint, in seconds.", FCVAR_NOTIFY, true, 0.0, true, maxRoundTime * 60);
@@ -41,18 +41,18 @@ command.", payload_id);
     g_cDebugAllMapsArePlMaps = CreateConVar(
         "sm_neopayload_all_maps_are_payload_maps", "0", mapCheckDesc,
         FCVAR_NOTIFY, true, 0.0, true, 1.0);
-    
+
     g_cNodePassAnnounceFreq = CreateConVar(
         "sm_neopayload_node_pass_announce_frequency", "15",
         "How much payload push progress, in percentages of 100, must be \
 accumulated before announcing another path node pass event. Setting this to \
 100 will never announce node passing. Setting this to 0 will announce every \
 node pass.", FCVAR_NOTIFY, true, 0.0, true, 100.0);
-    
+
     AutoExecConfig(true);
-    
+
     HookConVarChange(g_cRoundTime, CvarChanged_PayloadRoundTime);
-    
+
     HookEvent("game_round_start", Event_RoundStart);
 
     if (g_dpCoordFuncs == null) {
@@ -76,14 +76,11 @@ public void OnConfigsExecuted()
         int version = LookupMetaNodeVersion();
         PrintDebug(_, "Got meta version: %i", version);
         if (version == 0) {
-            PrintDebug(_, "No valid payload meta version node found in \
-map, unloading plugin.");
-            UnloadSelf();
+            SetFailState("No valid payload meta version node found in map.");
         }
-        else if (version != 1) {
-            PrintDebug(_, "Unsupported payload meta version %i found in \
-map, unloading plugin.", version);
-            UnloadSelf();
+        else if (version != NEOPL_META_VERSION) {
+            SetFailState("Unsupported payload meta version %i found in \
+map (expected %i).", version, NEOPL_META_VERSION);
         }
     }
 
@@ -123,9 +120,10 @@ public void OnClientDisconnect_Post(int client)
 public Action Event_RoundStart(Handle event, const char[] name,
     bool dontBroadcast)
 {
-    EndPayload();    
+    EndPayload();
     CreateTimer(2.0, Timer_DelayedSetRespawn, _, TIMER_FLAG_NO_MAPCHANGE);
     StartPayload();
+    return Plugin_Continue;
 }
 
 // Propagate payload roundtime cvar change to native game rules cvar.
